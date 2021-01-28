@@ -19,8 +19,9 @@ public class Text {
             "-m", new Request("mono color", x -> x.args.get(0), "-m", "--mono"),
 
             "-r", new Request("rainbow", x -> x.args.get(0), "-r", "--rainbow"),
+            "-p", new Request("plain text", x -> String.valueOf(x.requested), "-p", "--plain"),
+            "-a", new Request("animated", x -> String.valueOf(x.requested), "-a", "--animate")
 
-            "-p", new Request("plain text", x -> String.valueOf(x.requested), "-p", "--plain")
     ));
 
     static {
@@ -194,6 +195,7 @@ public class Text {
         }
 
         if (appRequests.get("-g").requested) {
+            if (appRequests.get("-g").args.size() > 0)
             gradientLvl = Integer.parseInt(appRequests.get("-g").args.get(0));
         }
         List<String> resultOutput = appender.getResult();
@@ -244,6 +246,8 @@ public class Text {
             gradientOutput(resultOutput);
         else if (appRequests.get("-m").requested)
             monoColorOutput(resultOutput);
+        else if (appRequests.get("-a").requested)
+            animatedOutput(resultOutput);
         else simpleOutput(resultOutput);
     }
 
@@ -252,8 +256,6 @@ public class Text {
         String current;
         int ind = -1;
         StringBuilder sb = new StringBuilder();
-
-        int total = 0;
 
         float compression = 0.08f;        
         float spread = 0.01f; 
@@ -274,7 +276,7 @@ public class Text {
             char[] chars = current.toCharArray();
             for (int i = 0; i < chars.length; i++) {
 
-                float v = total + i + (10 * prec) / spread;
+                float v = ind + i + (10 * prec) / spread;
 
                 float red = (float) (Math.sin(compression * v + 0) * 127 + 128);
                 float green = (float) (Math.sin(compression * v + 2 * (3.14 / 3)) * 127 + 128);
@@ -288,11 +290,71 @@ public class Text {
                 if (appRequests.get("-v").requested)
                     sb.append(rgb).append(" ").append("xTerm: ").append(xTermNumber).append(System.lineSeparator());
             }
-            total++;
             sb.append("\n");
         }
         System.out.print(sb.toString());
     }
+
+    public static void animatedOutput(List<String> lines)  {
+        Random random = new Random();
+        String current;
+        int ind = -1;
+        
+        float compression = 0.08f;        
+        float spread = 0.01f; 
+        // random.nextInt(10) * 0.01f;
+        float prec = 0.1f;
+        
+        Request req = appRequests.get("-r");
+        
+        if (req.requested) {
+            if (req.args.size() > 0) {
+                spread = Float.parseFloat(req.args.get(0));    
+            }
+        }
+        
+        float bias = 0f;
+        double counter = 0;
+        try {
+            while (true) {
+                StringBuilder sb = new StringBuilder();
+                while (++ind < lines.size()) {
+                    current = lines.get(ind);
+
+                    char[] chars = current.toCharArray();
+                    for (int i = 0; i < chars.length; i++) {
+
+                        float v = ind + i + (10 * prec) / spread;
+
+                        float red = (float) (Math.sin(bias + compression * v + 0) * 127 + 128);
+                        float green = (float) (Math.sin(bias + compression * v + 2 * (3.14 / 3)) * 127 + 128);
+                        float blue = (float) (Math.sin(bias + compression * v + 4 * (3.14 / 3)) * 127 + 128);
+
+                        RGB rgb = new RGB(red, green, blue);
+                        int xTermNumber = rgb.convertToXTermColor();
+
+                        sb.append(String.format("\033[38;5;%dm%c\033[0m", xTermNumber, chars[i]));
+                        if (appRequests.get("-v").requested)
+                            sb.append(rgb).append(" ").append("xTerm: ").append(xTermNumber).append(System.lineSeparator());
+                    }
+                    sb.append("\n");
+                }
+                System.out.print(sb.toString() + "\n\n");
+                Thread.sleep(50);
+                for (int i = 0; i < lines.size() + 2; i++) {
+                    System.out.printf("\033[%dA", 1); 
+                    System.out.print("\033[2K");
+                    
+                }
+                ind = -1;
+                    prec += 0.01f;
+                    bias = (float) Math.sin(counter);     
+                    counter += 0.1f;
+            }
+        } catch (InterruptedException e) {
+        }
+    }
+    
 
     public static void gradientOutput(List<String> lines) {
         Random random = new Random();
@@ -362,5 +424,10 @@ public class Text {
             System.out.printf("\033[38;5;%sm%s\033[0m%n", color,
                     var);
         }
+    }
+
+    public static void help() {
+        String help = "";
+        rainbowOutput(new ArrayList<>(Arrays.asList(help.split("\\n"))));
     }
 }
