@@ -64,3 +64,4 @@ $ java Jfiglol --font "/path/to/font.flf" "You text Here" --mono --animated
 ```
 $ java Jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 ```
+<img src="https://github.com/vzvz4/jfiglol/blob/master/img/help.png"/>
