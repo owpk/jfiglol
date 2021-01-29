@@ -32,7 +32,7 @@ $java Jfiglol \[mode\] \[printer\] \[options\]
 You can download figlet fonts from here http://www.figlet.org/examples.html aslo there is few in fonts folder which is in root project folder) 
 ```
 with specific font
-$ java Jfiglol --font "./fonts/3d.flf" "You text Here" -r
+$ java Jfiglol --font "/path/to/font.flf" "You text Here" -r
 
 print file
 $ java Jfiglol --file "path/to/file" -r
