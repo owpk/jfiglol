@@ -3,13 +3,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class Jfiglol {
+    private static final Random RANDOM = new Random();
     private static final String VERBOSE_FORMAT = "%-15s: %s%n";
     private static final String[][][] colors256 = new String[6][][];
-    private static Map<String, Request> globalOptions;
+    private static final Map<String, Request> GLOBAL_OPTIONS = new LinkedHashMap<>();
     private static Appender appender;
     private static Printer printer;
 
@@ -21,7 +20,11 @@ public class Jfiglol {
      * Interface to collect output data and pass it to printer
      */
     public interface Appender {
+        default String print() {
+            return String.format(VERBOSE_FORMAT, "mode", getName());
+        }
         List<String> getResult() throws IOException;
+        String getName();
     }
 
     /**
@@ -31,200 +34,246 @@ public class Jfiglol {
         void print(List<String> lines);
     }
 
-    private static class AbsPrinter {
-        protected boolean verboseRequested;
+    public static abstract class AbsPrinter implements Printer {
         protected boolean debugRequested;
+        protected boolean randomRequested;
         protected boolean animated;
-    }
+        protected int animationSpeed;
 
-    private static class GradientPrinter implements Printer {
-        protected Random random = new Random();
-        protected int gradientLvl = 2;
-
-        GradientPrinter(Request<Printer> request) {
-
+        public AbsPrinter() {
+            debugRequested = GLOBAL_OPTIONS.containsKey("-d");
+            animated = GLOBAL_OPTIONS.containsKey("-a");
+            randomRequested = GLOBAL_OPTIONS.containsKey("-r");
         }
 
         @Override
         public void print(List<String> lines) {
-            int colorBucket = random.nextInt(6);
+            if (animated) animatedPrint(lines);
+            else simplePrint(lines);
+        }
 
-            int count = 0;
-            int yInd = 0;
-            int xInd = 1;
-            boolean xDirection = true;
-            boolean yDirection = true;
-
-            int gradient = 0;
-
-            for (String var : lines) {
-
-                if (xInd == colors256.length || xInd == 0) {
-                    yInd = getByDirection(yDirection, yInd);
-                    xDirection = !xDirection;
-                    xInd = xDirection ? 2 : colors256.length - 2;
+        protected void animatedPrint(List<String> lines) {
+            try {
+                while (true) {
+                    StringBuilder sb = new StringBuilder();
+                    build(lines, sb);
+                    animate();
+                    System.out.print(sb.toString() + "\n\n");
+                    Thread.sleep(animationSpeed == 0 ? 100 : animationSpeed);
+                    for (int i = 0; i < lines.size() + 2; i++) {
+                        System.out.printf("\033[%dA", 1);
+                        System.out.print("\033[2K");
+                    }
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-                if (yInd == colors256.length || yInd == -1) {
-                    yDirection = !yDirection;
-                    colorBucket = (colorBucket + 1) % (colors256.length - 1);
-                    yInd = yDirection ? 1 : 5;
+        protected void simplePrint(List<String> lines) {
+            StringBuilder sb = new StringBuilder();
+            build(lines, sb);
+            System.out.print(sb.toString());
+        }
+
+        protected int getByDirection(boolean direction, int input) {
+            return direction ? ++input : --input;
+        }
+
+        protected abstract void build(List<String> lines, StringBuilder sb);
+
+        protected abstract void animate();
+
+        protected abstract String getName();
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.format(VERBOSE_FORMAT, "printer name", getName()));
+            sb.append(String.format(VERBOSE_FORMAT, "debug", debugRequested));
+            sb.append(String.format(VERBOSE_FORMAT, "random values", randomRequested));
+            sb.append(String.format(VERBOSE_FORMAT, "animation", animated));
+            if (animated)
+                sb.append(String.format(VERBOSE_FORMAT, "animation speed", animationSpeed));
+            return sb.toString();
+        }
+    }
+
+    public static class GradientPrinter extends AbsPrinter {
+        protected int colorBucket;
+        protected int yInd;
+        protected int xInd;
+        protected boolean xDirection;
+        protected boolean yDirection;
+        protected int gradientLvl;
+
+        public GradientPrinter(Request request) {
+            xInd = 1;
+            xDirection = true;
+            yDirection = true;
+            gradientLvl = request.args.size() > 0 ? Integer.parseInt(request.args.get(0)) :
+                    randomRequested ? RANDOM.nextInt(5) + 1 : 2;
+            colorBucket = randomRequested ? RANDOM.nextInt(colors256.length) : 0;
+            animationSpeed = 100;
+        }
+
+        @Override
+        protected void build(List<String> lines, StringBuilder sb) {
+            int ind = -1;
+            String current;
+            while (++ind < lines.size()) {
+                int gradient = 0;
+                current = lines.get(ind);
+                if (xInd >= colors256.length || xInd <= 0) {
+                    yInd = getByDirection(yDirection, yInd);
                     xDirection = !xDirection;
                     xInd = xDirection ? 1 : colors256.length - 1;
                 }
 
-//                if (appRequests.get("-v").requested)
-//                    System.out.printf("l %2s: x %s : y %s ", count++, xInd, yInd);
+                if (yInd >= colors256.length || yInd < 0) {
+                    yDirection = !yDirection;
+                    colorBucket = (colorBucket + 1) % colors256.length;
+                    yInd = yDirection ? 0 : 5;
+                    xDirection = !xDirection;
+                    xInd = xDirection ? 1 : colors256.length - 1;
+                }
 
-                System.out.printf("\033[38;5;%sm%s\033[0m%n",
+                if (debugRequested)
+                    sb.append(String.format("b %d : x %2s: y %2s c: %s ", colorBucket, xInd, yInd, colors256[colorBucket][yInd][xInd]));
+
+                sb.append(String.format("\033[38;5;%sm%s\033[0m%n",
                         colors256[colorBucket][yInd][xInd],
-                        var);
-
+                        current));
+                xInd = getByDirection(xDirection, xInd);
                 gradient++;
                 if (gradient % gradientLvl == 0 && gradient != 0) {
                     xInd = getByDirection(xDirection, xInd);
                 }
+
             }
         }
 
-        private static int getByDirection(boolean direction, int input) {
-            return direction ? ++input : --input;
-        }
-    }
-
-    private static class RainbowPrinter implements Printer {
-        protected float compression = 0.08f;
-        protected float spread = 0.01f;
-        protected float prec = 0.05f;
-
-        public RainbowPrinter() {
-
-        }
-
-        public RainbowPrinter(Request<Printer> request) {
+        @Override
+        protected void animate() {
+            xInd = getByDirection(xDirection, xInd);
         }
 
         @Override
-        public void print(List<String> lines) {
-            String current;
-            int ind = -1;
-            StringBuilder sb = new StringBuilder();
+        protected String getName() {
+            return "Gradient printer";
+        }
 
+        @Override
+        public String toString() {
+            return super.toString() +
+                    String.format(VERBOSE_FORMAT, "gradient level", gradientLvl);
+        }
+
+    }
+
+    public static class RainbowPrinter extends AbsPrinter {
+        protected Random random;
+        protected float compression;
+        protected float spread;
+        protected float freq;
+        protected float bias;
+
+        public RainbowPrinter() {
+            animationSpeed = 50;
+            random = new Random();
+        }
+
+        public RainbowPrinter(Request request) {
+            this();
+            compression = request.args.size() > 0 ? Float.parseFloat(request.args.get(0)) :
+                     randomRequested ? random.nextFloat() : 0.08f;
+            spread = request.args.size() >= 2 ? Float.parseFloat(request.args.get(1)) :
+                    randomRequested ? random.nextFloat() : 0.01f;
+            freq = request.args.size() >= 3 ? Float.parseFloat(request.args.get(2)) :
+                    randomRequested ? random.nextFloat() : 0.05f;
+        }
+
+        protected void animate() {
+            bias += 0.005f;
+            freq = (float) Math.sin(bias);
+        }
+
+        @Override
+        protected String getName() {
+            return "Rainbow printer";
+        }
+
+        protected void build(List<String> lines, StringBuilder sb) {
+            int ind = -1;
+            String current;
             while (++ind < lines.size()) {
                 current = lines.get(ind);
-
                 char[] chars = current.toCharArray();
                 for (int i = 0; i < chars.length; i++) {
-
-                    float v = ind + i + (10 * prec) / spread;
-
+                    float v = ind + i + (10 * freq) / spread;
                     float red = (float) (Math.sin(compression * v + 0) * 127 + 128);
                     float green = (float) (Math.sin(compression * v + 2 * (3.14 / 3)) * 127 + 128);
                     float blue = (float) (Math.sin(compression * v + 4 * (3.14 / 3)) * 127 + 128);
-
                     RGB rgb = new RGB(red, green, blue);
-
                     int xTermNumber = rgb.convertToXTermColor();
-
                     sb.append(String.format("\033[38;5;%dm%c\033[0m", xTermNumber, chars[i]));
-                    // if (appRequests.get("-v").requested)
-                    //     sb.append(rgb).append(" ").append("xTerm: ").append(xTermNumber).append(System.lineSeparator());
+                    if (debugRequested)
+                        sb.append(rgb).append(" ").append("xTerm: ").append(xTermNumber).append(System.lineSeparator());
                 }
                 sb.append("\n");
             }
-            System.out.print(sb.toString());
-        }
-    }
-
-    private static class MonoPrinter implements Printer {
-        private String color;
-
-        MonoPrinter(Request<Printer> request) {
-
         }
 
         @Override
-        public void print(List<String> lines) {
-            int count = 0;
-//            boolean verb = appRequests.get("-v").requested;
-
-            for (String var : lines) {
-//                if (verb)
-//                    System.out.printf("l: %-2s ", count++);
-                System.out.printf("\033[38;5;%sm%s\033[0m%n", color,
-                        var);
-            }
+        public String toString() {
+            return super.toString() +
+                    String.format(VERBOSE_FORMAT, "compression", compression) +
+                    String.format(VERBOSE_FORMAT, "spread", spread) +
+                    String.format(VERBOSE_FORMAT, "freq", freq);
         }
     }
 
-    private static class AnimatedMonoPrinter extends MonoPrinter {
-        AnimatedMonoPrinter(Request<Printer> request) {
-            super(request);
-        }
-    }
+    public static class MonoPrinter extends AbsPrinter {
+        private int startColor;
+        private boolean direction;
 
-    private static class AnimatedGradientPrinter extends GradientPrinter {
-        AnimatedGradientPrinter(Request<Printer> request) {
-            super(request);
-        }
-    }
-
-    private static class AnimatedRainbowPrinter extends RainbowPrinter {
-        public AnimatedRainbowPrinter(Request<Printer> request) {
-            super(request);
+        public MonoPrinter(Request request) {
+            String color = request.args.size() > 0 ? request.args.get(0) :
+                    randomRequested ? String.valueOf((16 + RANDOM.nextInt(255 - 16))) : "143";
+            startColor = Integer.parseInt(color);
+            direction = true;
         }
 
         @Override
-        public void print(List<String> lines) {
-            float bias = 0f;
-            double counter = 0;
-            int ind = -1;
-            String current;
-            try {
-                while (true) {
-                    StringBuilder sb = new StringBuilder();
-                    while (++ind < lines.size()) {
-                        current = lines.get(ind);
+        protected void build(List<String> lines, StringBuilder sb) {
+            for (String var : lines)
+                sb.append(String.format("\033[38;5;%dm%s\033[0m%n", startColor, var));
+            if (debugRequested)
+                sb.append(String.format("c: %-2s ", startColor));
+        }
 
-                        char[] chars = current.toCharArray();
-                        for (int i = 0; i < chars.length; i++) {
+        @Override
+        protected void animate() {
+            if (startColor > 254 || startColor < 17) direction = !direction;
+            startColor = getByDirection(direction, startColor);
+        }
 
-                            float v = ind + i + (10 * prec) / spread;
+        @Override
+        protected String getName() {
+            return "Mono printer";
+        }
 
-                            float red = (float) (Math.sin(bias + compression * v + 0) * 127 + 128);
-                            float green = (float) (Math.sin(bias + compression * v + 2 * (3.14 / 3)) * 127 + 128);
-                            float blue = (float) (Math.sin(bias + compression * v + 4 * (3.14 / 3)) * 127 + 128);
-
-                            RGB rgb = new RGB(red, green, blue);
-                            int xTermNumber = rgb.convertToXTermColor();
-
-                            sb.append(String.format("\033[38;5;%dm%c\033[0m", xTermNumber, chars[i]));
-//                        if (appRequests.get("-v").requested)
-//                            sb.append(rgb).append(" ").append("xTerm: ").append(xTermNumber).append(System.lineSeparator());
-                        }
-                        sb.append("\n");
-                    }
-                    System.out.print(sb.toString() + "\n\n");
-                    Thread.sleep(50);
-                    for (int i = 0; i < lines.size() + 2; i++) {
-                        System.out.printf("\033[%dA", 1);
-                        System.out.print("\033[2K");
-
-                    }
-                    ind = -1;
-                    prec += 0.01f;
-                    bias = (float) Math.sin(counter);
-                    counter += 0.1f;
-                }
-            } catch (InterruptedException e) {
-            }
+        @Override
+        public String toString() {
+            return super.toString() +
+                    String.format(VERBOSE_FORMAT, "color", startColor);
         }
     }
 
     /**
      * User input requests container
      */
-    private static class Request<T> {
+    private static class Request {
         String[] names;
         boolean requested;
         List<String> args;
@@ -259,7 +308,7 @@ public class Jfiglol {
     private static class FileAppender implements Appender {
         private final String file;
 
-        public FileAppender(Request<Appender> request) {
+        public FileAppender(Request request) {
             file = request.args.get(0);
         }
 
@@ -267,18 +316,38 @@ public class Jfiglol {
         public List<String> getResult() throws IOException {
             return Files.readAllLines(Paths.get(file));
         }
+
+        @Override
+        public String getName() {
+            return "File appender";
+        }
+
+        @Override
+        public String toString() {
+            return print() + String.format(VERBOSE_FORMAT, "file", file);
+        }
     }
 
     public static class DefaultAppender implements Appender {
         private final String input;
 
-        public DefaultAppender(Request<Appender> request) {
+        public DefaultAppender(Request request) {
             this.input = request.args.get(0);
         }
 
         @Override
         public List<String> getResult() throws IOException {
             return new ArrayList<>(Arrays.asList(input.split("\\n")));
+        }
+
+        @Override
+        public String getName() {
+            return "Default appender";
+        }
+
+        @Override
+        public String toString() {
+            return print() + String.format(VERBOSE_FORMAT, "input text", input);
         }
     }
 
@@ -296,7 +365,7 @@ public class Jfiglol {
         private int mode;
         private int comments;
 
-        public FlfAppender(Request<Appender> request) {
+        public FlfAppender(Request request) {
             file = request.args.get(0);
             input = request.args.get(1);
         }
@@ -360,9 +429,23 @@ public class Jfiglol {
                         throw new IllegalArgumentException("Unexpected character: " + letter);
                     appendLine(sb, OFFSET_MAP.get((int) letter) + i);
                 }
-                result.add(sb.toString().replaceAll("@@", "").replaceAll("@", "").replaceAll("\\$", ""));
+                result.add(sb.toString().replaceAll("@@", "")
+                        .replaceAll("@", "")
+                        .replaceAll("\\$", ""));
                 i++;
             }
+        }
+
+        @Override
+        public String getName() {
+            return "flf font appender";
+        }
+
+        @Override
+        public String toString() {
+            return print()
+                    + String.format(VERBOSE_FORMAT, "font path", file)
+                    + String.format(VERBOSE_FORMAT, "input text", input);
         }
     }
 
@@ -414,56 +497,51 @@ public class Jfiglol {
 
     private static abstract class ArgumentHandler<T> {
         protected ArgumentHandler<?> next;
-        protected Request<T> request;
-        protected Map<String, Request<T>> localRequests;
+        protected Request request;
+        protected Map<String, Request> localRequests;
 
-        protected abstract Map<String, Request<T>> getLocalRequests();
+        protected abstract Map<String, Request> getLocalRequests();
+
+        protected boolean requestFound;
 
         public ArgumentHandler() {
             localRequests = getLocalRequests();
         }
 
         void handle(String[] args) {
-            boolean requestFound = false;
             int off = 0;
             cx:
             for (String arg : args) {
-                for (Map.Entry<String, Request<T>> entry : localRequests.entrySet()) {
-                    if (arg.startsWith("-") && requestFound) {
+                for (Map.Entry<String, Request> entry : localRequests.entrySet()) {
+                    if ((arg.startsWith("-") && this.requestFound)) {
                         if (this.next != null) {
                             String[] arr = new String[args.length - off - 1];
                             System.arraycopy(args, off + 1, arr, 0, arr.length);
                             this.next.handle(arr);
                         }
                         return;
-                    } else if (requestFound) {
+                    } else if (this.requestFound) {
                         off++;
-                        request.add(arg);
+                        this.request.add(arg);
                     }
 
-                    if (!requestFound)
-                        requestFound = resolve(entry.getValue(), arg);
+                    if (!this.requestFound)
+                        this.requestFound = resolve(entry.getValue(), arg);
 
-                    if (requestFound)
+                    if (this.requestFound)
                         continue cx;
-
                 }
-                if (!requestFound) {
+                if (!this.requestFound) {
                     handleUnrecognizedOption(arg);
                 }
             }
         }
 
         protected void handleUnrecognizedOption(String arg) {
-            System.out.println("Unrecognized option: " + arg);
-            throwError();
+            System.out.println("Try to run Jfiglol --help");
         }
 
-        protected void throwError() {
-
-        }
-
-        protected boolean resolve(Request<T> request, String arg) {
+        protected boolean resolve(Request request, String arg) {
             for (String name : localRequests.get(request.names[0]).names) {
                 if (arg.equals(name)) {
                     this.request = request;
@@ -480,64 +558,84 @@ public class Jfiglol {
     }
 
     private static class ModeHandler extends ArgumentHandler<Appender> {
+
         @Override
-        protected void throwError() {
+        protected void handleUnrecognizedOption(String arg) {
+            System.out.println("Unrecognized mode option: " + arg);
+            super.handleUnrecognizedOption(arg);
             System.exit(0);
         }
 
-        protected Map<String, Request<Appender>> getLocalRequests() {
+        protected Map<String, Request> getLocalRequests() {
             return new LinkedHashMap<>(Map.of(
-                    "--plain", new Request<>("plain text", DefaultAppender.class, "--plain"),
-                    "--font", new Request<>("font", FlfAppender.class, "--font"),
-                    "--file", new Request<>("file", FileAppender.class, "--file")
+                    "--plain", new Request("plain text", DefaultAppender.class, "--plain"),
+                    "--font", new Request("font", FlfAppender.class, "--font"),
+                    "--file", new Request("file", FileAppender.class, "--file")
             ));
         }
 
-        public Appender getAppender() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-            return (Appender) this.request.clazz.getConstructor(Request.class).newInstance(this.request);
+        public Appender getAppender() throws NoSuchMethodException, IllegalAccessException,
+                InvocationTargetException, InstantiationException {
+            return (Appender) this.request.clazz.getConstructor(Request.class)
+                    .newInstance(this.request);
         }
     }
 
     private static class PrinterHandler extends ArgumentHandler<Printer> {
+
         @Override
-        protected void throwError() {
+        protected void handleUnrecognizedOption(String arg) {
+            System.out.println("Unrecognized printer option: " + arg);
+            super.handleUnrecognizedOption(arg);
             System.exit(0);
         }
 
-        protected Map<String, Request<Printer>> getLocalRequests() {
-            boolean animated = globalOptions.containsKey("--animated");
+        protected Map<String, Request> getLocalRequests() {
             return new LinkedHashMap<>(Map.of(
-                    "-m", new Request<>("mono color", animated ?
-                            AnimatedMonoPrinter.class : MonoPrinter.class,
+                    "-m", new Request("mono color", MonoPrinter.class,
                             "-m", "--mono"),
-
-                    "-g", new Request<>("plain text", animated ?
-                            AnimatedGradientPrinter.class : GradientPrinter.class,
+                    "-g", new Request("plain text", GradientPrinter.class,
                             "-g", "--gradient"),
-
-                    "-r", new Request<>("rainbow", animated ?
-                            AnimatedRainbowPrinter.class : RainbowPrinter.class,
+                    "-r", new Request("rainbow", RainbowPrinter.class,
                             "-r", "--rainbow")
             ));
         }
 
-        public Printer getPrinter() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-            return (Printer) this.request.clazz.getConstructor(Request.class).newInstance(this.request);
+        public Printer getPrinter() throws NoSuchMethodException, IllegalAccessException,
+                InvocationTargetException, InstantiationException {
+            return (Printer) this.request.clazz.getConstructor(Request.class)
+                    .newInstance(this.request);
         }
     }
 
-    private static class ExtendsHandler extends ArgumentHandler {
+    private static class ExtendsHandler extends ArgumentHandler<String> {
+
+        @Override
+        void handle(String[] args) {
+            Map<String, Request> local = getLocalRequests();
+            for (String arg : args) {
+                for (Map.Entry<String, Request> entry : local.entrySet()) {
+                    Request request = entry.getValue();
+                    String[] names = request.names;
+                    for (String name : names) {
+                        if (name.equals(arg)) {
+                            GLOBAL_OPTIONS.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                }
+            }
+        }
 
         protected Map<String, Request> getLocalRequests() {
             return new LinkedHashMap<>(Map.of(
-                    "-a", new Request("mono color", "-a", "--animated"),
-                    "-r", new Request("plain text", "-r", "--random"),
-                    "-d", new Request("rainbow", "-d", "--debug"),
-                    "-v", new Request("rainbow", "-v", "--verbose")
+                    "-a", new Request("animated", "-a", "--animated"),
+                    "-r", new Request("random params", "-r", "--random"),
+                    "-d", new Request("app debug", "-d", "--debug"),
+                    "-v", new Request("verbose", "-v", "--verbose")
             ));
         }
     }
-    
+
     public static void main(String... args) throws Exception {
         if (args[0].equals("--help")) {
             help();
@@ -547,17 +645,22 @@ public class Jfiglol {
             return;
         }
 
-        ExtendsHandler extendsHandler = new ExtendsHandler();
         ModeHandler modeHandler = new ModeHandler();
         PrinterHandler printerHandler = new PrinterHandler();
+        ExtendsHandler extendsHandler = new ExtendsHandler();
 
-//        extendsHandler.setNext(modeHandler);
         modeHandler.setNext(printerHandler);
-        extendsHandler.handle(args);
+        printerHandler.setNext(extendsHandler);
 
-//        globalOptions = extendsHandler.getGlobalOptions();
+        modeHandler.handle(args);
+
         appender = modeHandler.getAppender();
         printer = printerHandler.getPrinter();
+
+        if (GLOBAL_OPTIONS.containsKey("-v")) {
+            System.out.print(appender);
+            System.out.print(printer);
+        }
 
         printer.print(appender.getResult());
     }
@@ -573,7 +676,7 @@ public class Jfiglol {
             }
         }
     }
-    
+
     public static void palette() {
         StringBuilder sb = new StringBuilder();
         for (String[][] strings : colors256) {
