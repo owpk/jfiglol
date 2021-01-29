@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Text {
+public class Jfiglol {
     private static final String VERBOSE_FORMAT = "%-15s: %s%n";
     private static final String[][][] colors256 = new String[6][][];
     private static Map<String, Request> globalOptions;
@@ -30,18 +30,16 @@ public class Text {
     public interface Printer {
         void print(List<String> lines);
     }
-    
+
     private static class AbsPrinter {
         protected boolean verboseRequested;
         protected boolean debugRequested;
         protected boolean animated;
-
-        
     }
 
     private static class GradientPrinter implements Printer {
-        private Random random = new Random();
-        private int gradientLvl = 2;
+        protected Random random = new Random();
+        protected int gradientLvl = 2;
 
         GradientPrinter(Request<Printer> request) {
 
@@ -95,10 +93,10 @@ public class Text {
     }
 
     private static class RainbowPrinter implements Printer {
-        private float compression = 0.08f;
-        private float spread = 0.01f;
-        private float prec = 0.05f;
-        
+        protected float compression = 0.08f;
+        protected float spread = 0.01f;
+        protected float prec = 0.05f;
+
         public RainbowPrinter() {
 
         }
@@ -159,11 +157,67 @@ public class Text {
         }
     }
 
-    private static class AnimatedPrinter implements Printer {
+    private static class AnimatedMonoPrinter extends MonoPrinter {
+        AnimatedMonoPrinter(Request<Printer> request) {
+            super(request);
+        }
+    }
+
+    private static class AnimatedGradientPrinter extends GradientPrinter {
+        AnimatedGradientPrinter(Request<Printer> request) {
+            super(request);
+        }
+    }
+
+    private static class AnimatedRainbowPrinter extends RainbowPrinter {
+        public AnimatedRainbowPrinter(Request<Printer> request) {
+            super(request);
+        }
 
         @Override
         public void print(List<String> lines) {
+            float bias = 0f;
+            double counter = 0;
+            int ind = -1;
+            String current;
+            try {
+                while (true) {
+                    StringBuilder sb = new StringBuilder();
+                    while (++ind < lines.size()) {
+                        current = lines.get(ind);
 
+                        char[] chars = current.toCharArray();
+                        for (int i = 0; i < chars.length; i++) {
+
+                            float v = ind + i + (10 * prec) / spread;
+
+                            float red = (float) (Math.sin(bias + compression * v + 0) * 127 + 128);
+                            float green = (float) (Math.sin(bias + compression * v + 2 * (3.14 / 3)) * 127 + 128);
+                            float blue = (float) (Math.sin(bias + compression * v + 4 * (3.14 / 3)) * 127 + 128);
+
+                            RGB rgb = new RGB(red, green, blue);
+                            int xTermNumber = rgb.convertToXTermColor();
+
+                            sb.append(String.format("\033[38;5;%dm%c\033[0m", xTermNumber, chars[i]));
+//                        if (appRequests.get("-v").requested)
+//                            sb.append(rgb).append(" ").append("xTerm: ").append(xTermNumber).append(System.lineSeparator());
+                        }
+                        sb.append("\n");
+                    }
+                    System.out.print(sb.toString() + "\n\n");
+                    Thread.sleep(50);
+                    for (int i = 0; i < lines.size() + 2; i++) {
+                        System.out.printf("\033[%dA", 1);
+                        System.out.print("\033[2K");
+
+                    }
+                    ind = -1;
+                    prec += 0.01f;
+                    bias = (float) Math.sin(counter);
+                    counter += 0.1f;
+                }
+            } catch (InterruptedException e) {
+            }
         }
     }
 
@@ -175,24 +229,11 @@ public class Text {
         boolean requested;
         List<String> args;
         String description;
-        Function<Request<T>, String> function;
-        Supplier<T> supplier;
         Class<?> clazz;
 
         Request(String description, Class<?> clazz, String... names) {
             this(description, names);
             this.clazz = clazz;
-        }
-
-        Request(String description, Function<Request<T>,
-                String> function, String... names) {
-            this(description, names);
-            this.function = function;
-        }
-
-        Request(String description, Supplier<T> supplier, String... names) {
-            this(description, names);
-            this.supplier = supplier;
         }
 
         Request(String description, String... names) {
@@ -371,14 +412,14 @@ public class Text {
         }
     }
 
-    private static abstract class Handler<T> {
-        protected Handler<?> next;
+    private static abstract class ArgumentHandler<T> {
+        protected ArgumentHandler<?> next;
         protected Request<T> request;
         protected Map<String, Request<T>> localRequests;
 
         protected abstract Map<String, Request<T>> getLocalRequests();
 
-        public Handler() {
+        public ArgumentHandler() {
             localRequests = getLocalRequests();
         }
 
@@ -397,7 +438,7 @@ public class Text {
                         return;
                     } else if (requestFound) {
                         off++;
-                        request.args.add(arg);
+                        request.add(arg);
                     }
 
                     if (!requestFound)
@@ -433,12 +474,12 @@ public class Text {
             return false;
         }
 
-        void setNext(Handler<?> next) {
+        void setNext(ArgumentHandler<?> next) {
             this.next = next;
         }
     }
 
-    private static class ModeHandler extends Handler<Appender> {
+    private static class ModeHandler extends ArgumentHandler<Appender> {
         @Override
         protected void throwError() {
             System.exit(0);
@@ -457,23 +498,26 @@ public class Text {
         }
     }
 
-    private static class PrinterHandler extends Handler<Printer> {
+    private static class PrinterHandler extends ArgumentHandler<Printer> {
         @Override
         protected void throwError() {
             System.exit(0);
         }
 
         protected Map<String, Request<Printer>> getLocalRequests() {
-            boolean animated = globalOptions.contains("--animated");
+            boolean animated = globalOptions.containsKey("--animated");
             return new LinkedHashMap<>(Map.of(
-                    "-m", new Request<>("mono color", animated ? AnimatedMonoPrinter.class : MonoPrinter.class, 
-                    "-m", "--mono"),
-                    
-                    "-g", new Request<>("plain text", animated ? AnimatedGradientPrinter.class : GradientPrinter.class, 
-                    "-g", "--gradient"),
-                    
-                    "-r", new Request<>("rainbow", animated ? AnimatedRainbowPrinter.class : RainbowPrinter.class, 
-                    "-r", "--rainbow")
+                    "-m", new Request<>("mono color", animated ?
+                            AnimatedMonoPrinter.class : MonoPrinter.class,
+                            "-m", "--mono"),
+
+                    "-g", new Request<>("plain text", animated ?
+                            AnimatedGradientPrinter.class : GradientPrinter.class,
+                            "-g", "--gradient"),
+
+                    "-r", new Request<>("rainbow", animated ?
+                            AnimatedRainbowPrinter.class : RainbowPrinter.class,
+                            "-r", "--rainbow")
             ));
         }
 
@@ -482,7 +526,7 @@ public class Text {
         }
     }
 
-    private static class ExtendsHandler extends Handler {
+    private static class ExtendsHandler extends ArgumentHandler {
 
         protected Map<String, Request> getLocalRequests() {
             return new LinkedHashMap<>(Map.of(
@@ -493,38 +537,25 @@ public class Text {
             ));
         }
     }
-
-    // Usage: java Jfiglol [mode] [printer] [options]
-    // mode : [--plain {"User input"} | --font {path/to/font_file.flf, "User input"} | --file {path}] 
-    // printer : [--mono {color (range 16...255)} | --gradient {level (float number, default 0.3)} | --rainbow {0, 0} ]
-    // options: [--animated {speed} | --random | --debug | --verbose]
-    // Examples: 
-    //          java Jpiglol --font "./fonts/3d.flf" "Hello World!" --rainbow 0.3 --animated
-    //          java Jpiglol --plain "Hello World!" --gradient 0.2
-    //          java Jfiglol --file "./examples/example.txt" --mono 144
-    //
-    // Additions: Jfiglol [--help | --palette-table]
-    // Examples:
-    //          java Jfiglol --help
-    //          java Jfiglol --palette-table
-    //
-    // With passing arguments via pipeline:
-    //          echo "Hello World!" | xargs -I {} java Jfiglol --plain "{}" --rainbow --animated
-
+    
     public static void main(String... args) throws Exception {
         if (args[0].equals("--help")) {
+            help();
+            return;
+        } else if (args[0].equals("--palette")) {
+            palette();
             return;
         }
-        
+
         ExtendsHandler extendsHandler = new ExtendsHandler();
         ModeHandler modeHandler = new ModeHandler();
         PrinterHandler printerHandler = new PrinterHandler();
-        
-        extendsHandler.setNext(modeHandler);
+
+//        extendsHandler.setNext(modeHandler);
         modeHandler.setNext(printerHandler);
         extendsHandler.handle(args);
-        
-        globalOptions = extendsHandler.getGlobalOptions();
+
+//        globalOptions = extendsHandler.getGlobalOptions();
         appender = modeHandler.getAppender();
         printer = printerHandler.getPrinter();
 
@@ -542,99 +573,50 @@ public class Text {
             }
         }
     }
+    
+    public static void palette() {
+        StringBuilder sb = new StringBuilder();
+        for (String[][] strings : colors256) {
+            for (String[] string : strings) {
+                for (String s : string) {
+                    sb.append("\033[38;5;")
+                            .append(s).append("m")
+                            .append(s)
+                            .append("\033[0m")
+                            .append(" ");
+                }
+                sb.append("\n");
+            }
+        }
+        System.out.println(sb.toString());
+    }
 
-//    public static void rainbowOutput(List<String> lines) {
-//
-//    }
-//
-//    public static void animatedOutput(List<String> lines)  {
-//        Random random = new Random();
-//        String current;
-//        int ind = -1;
-//
-//        float compression = 0.08f;
-//        float spread = 0.01f;
-//        // random.nextInt(10) * 0.01f;
-//        float prec = 0.1f;
-//
-//        Request req = appRequests.get("-r");
-//
-//        if (req.requested) {
-//            if (req.args.size() > 0) {
-//                spread = Float.parseFloat(req.args.get(0));
-//            }
-//        }
-//
-//        float bias = 0f;
-//        double counter = 0;
-//        try {
-//            while (true) {
-//                StringBuilder sb = new StringBuilder();
-//                while (++ind < lines.size()) {
-//                    current = lines.get(ind);
-//
-//                    char[] chars = current.toCharArray();
-//                    for (int i = 0; i < chars.length; i++) {
-//
-//                        float v = ind + i + (10 * prec) / spread;
-//
-//                        float red = (float) (Math.sin(bias + compression * v + 0) * 127 + 128);
-//                        float green = (float) (Math.sin(bias + compression * v + 2 * (3.14 / 3)) * 127 + 128);
-//                        float blue = (float) (Math.sin(bias + compression * v + 4 * (3.14 / 3)) * 127 + 128);
-//
-//                        RGB rgb = new RGB(red, green, blue);
-//                        int xTermNumber = rgb.convertToXTermColor();
-//
-//                        sb.append(String.format("\033[38;5;%dm%c\033[0m", xTermNumber, chars[i]));
-//                        if (appRequests.get("-v").requested)
-//                            sb.append(rgb).append(" ").append("xTerm: ").append(xTermNumber).append(System.lineSeparator());
-//                    }
-//                    sb.append("\n");
-//                }
-//                System.out.print(sb.toString() + "\n\n");
-//                Thread.sleep(50);
-//                for (int i = 0; i < lines.size() + 2; i++) {
-//                    System.out.printf("\033[%dA", 1);
-//                    System.out.print("\033[2K");
-//
-//                }
-//                ind = -1;
-//                    prec += 0.01f;
-//                    bias = (float) Math.sin(counter);
-//                    counter += 0.1f;
-//            }
-//        } catch (InterruptedException e) {
-//        }
-//    }
-
-//    public static void simpleOutput(List<String> lines) {
-//        int count = 0;
-//        boolean verb = appRequests.get("-v").requested;
-//
-//        for (String var : lines) {
-//            if (verb)
-//                System.out.printf("l: %-2s ", count++);
-//            System.out.println(var);
-//        }
-//    }
-//
-   public static void help() {
-        String s = "Usage: java Jfiglol [mode] [printer] [options]\n" +
-        "    mode : [--plain {\"User input\"} | --font {path/to/font_file.flf, \"User input\"} | --file {path}] \n" +
-        "    printer : [--mono {color (range 16...255)} | --gradient {level (float number, default 0.3)} | --rainbow {0, 0} ]\n" +
-        "    options: [--animated {speed} | --random | --debug | --verbose]\n" +
-        "    Examples: \n" +
-        "             java Jpiglol --font \"./fonts/3d.flf\" \"Hello World!\" --rainbow 0.3 --animated\n" +
-        "             java Jpiglol --plain \"Hello World!\" --gradient 0.2\n" +
-        "             java Jfiglol --file \"./examples/example.txt\" --mono 144\n" +
-        "    \n" +
-        "    Additions: Jfiglol [--help | --palette-table]\n" +
-        "    Examples:\n" +
-        "             java Jfiglol --help\n" +
-        "             java Jfiglol --palette-table\n" +
-        "    \n" +
-        "    With passing arguments via pipeline:\n" +
-        "             echo \"Hello World!\" | xargs -I {} java Jfiglol --plain \"{}\" --rainbow --animated";
+    public static void help() {
+        String help = "Usage: java Jfiglol [mode] [printer] [options]\n" +
+                "mode :    [--plain {\"User input\"} |\n" +
+                "           --font {path/to/font_file.flf, \"User input\"} |\n" +
+                "           --file {path}] \n\n" +
+                "printer : [--mono {color (range 16...255)} |\n" +
+                "           --gradient {level (float number, default 0.3)} |\n" +
+                "           --rainbow {0, 0} ]\n\n" +
+                "options:  [--animated {speed} |\n" +
+                "           --random |\n" +
+                "           --debug |\n" +
+                "           --verbose]\n\n" +
+                "Examples: \n" +
+                "         java Jfiglol --font \"./fonts/3d.flf\" \"Hello World!\" --rainbow 0.3 --animated\n" +
+                "         java Jfiglol --plain \"Hello World!\" --gradient 0.2\n" +
+                "         java Jfiglol --file \"./examples/example.txt\" --mono 144\n" +
+                "\n\n" +
+                "Additions: Jfiglol [--help | --palette-table]\n" +
+                "Examples:\n" +
+                "         java Jfiglol --help\n" +
+                "         java Jfiglol --palette\n" +
+                "\n" +
+                "With passing arguments via pipeline:\n" +
+                "         echo \"Hello World!\" | xargs -I {} java Jfiglol --plain \"{}\" --rainbow --animated";
         new RainbowPrinter().print(new ArrayList<>(Arrays.asList(help.split("\\n"))));
-   }
+    }
 }
+
+
