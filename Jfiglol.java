@@ -7,10 +7,8 @@ import java.util.*;
 public class Jfiglol {
     private static final Random RANDOM = new Random();
     private static final String VERBOSE_FORMAT = "%-15s: %s%n";
-    private static final String[][][] colors256 = new String[6][][];
+    private static final String[][][] COLORS_256 = new String[6][][];
     private static final Map<String, Request> GLOBAL_OPTIONS = new LinkedHashMap<>();
-    private static Appender appender;
-    private static Printer printer;
 
     static {
         fillColors();
@@ -23,7 +21,9 @@ public class Jfiglol {
         default String print() {
             return String.format(VERBOSE_FORMAT, "mode", getName());
         }
+
         List<String> getResult() throws IOException;
+
         String getName();
     }
 
@@ -34,6 +34,10 @@ public class Jfiglol {
         void print(List<String> lines);
     }
 
+    /**
+     * Abstract printer, base output printer class contains method
+     * to print and/or animate output
+     */
     public static abstract class AbsPrinter implements Printer {
         protected boolean debugRequested;
         protected boolean randomRequested;
@@ -99,6 +103,36 @@ public class Jfiglol {
         }
     }
 
+    /**
+     * User input requests
+     */
+    private static class Request {
+        private String[] names;
+        private List<String> args;
+        private String help;
+        private Class<?> clazz;
+
+        Request(String help, Class<?> clazz, String... names) {
+            this(help, names);
+            this.clazz = clazz;
+        }
+
+        Request(String help, String... names) {
+            this.names = names;
+            this.help = help;
+            args = new ArrayList<>();
+        }
+
+        void add(String arg) {
+            args.add(arg);
+        }
+
+        @Override
+        public String toString() {
+            return String.format(" --Request %s: args: %s", Arrays.toString(names), args);
+        }
+    }
+
     public static class GradientPrinter extends AbsPrinter {
         public static int DEFAULT_GRADIENT = 2;
         protected int colorBucket;
@@ -114,7 +148,7 @@ public class Jfiglol {
             yDirection = true;
             gradientLvl = request.args.size() > 0 ? Integer.parseInt(request.args.get(0)) :
                     randomRequested ? RANDOM.nextInt(5) + 1 : DEFAULT_GRADIENT;
-            colorBucket = randomRequested ? RANDOM.nextInt(colors256.length) : 0;
+            colorBucket = randomRequested ? RANDOM.nextInt(COLORS_256.length) : 0;
             animationSpeed = 100;
         }
 
@@ -125,25 +159,25 @@ public class Jfiglol {
             int gradient = 0;
             while (++ind < lines.size()) {
                 current = lines.get(ind);
-                if (xInd >= colors256.length || xInd <= 0) {
+                if (xInd >= COLORS_256.length || xInd <= 0) {
                     yInd = getByDirection(yDirection, yInd);
                     xDirection = !xDirection;
-                    xInd = xDirection ? 1 : colors256.length - 1;
+                    xInd = xDirection ? 1 : COLORS_256.length - 1;
                 }
 
-                if (yInd >= colors256.length || yInd < 0) {
+                if (yInd >= COLORS_256.length || yInd < 0) {
                     yDirection = !yDirection;
-                    colorBucket = (colorBucket + 1) % colors256.length;
+                    colorBucket = (colorBucket + 1) % COLORS_256.length;
                     yInd = yDirection ? 0 : 5;
                     xDirection = !xDirection;
-                    xInd = xDirection ? 1 : colors256.length - 1;
+                    xInd = xDirection ? 1 : COLORS_256.length - 1;
                 }
 
                 if (debugRequested)
-                    sb.append(String.format("b %d : x %2s: y %2s c: %s ", colorBucket, xInd, yInd, colors256[colorBucket][yInd][xInd]));
+                    sb.append(String.format("b %d : x %2s: y %2s c: %s ", colorBucket, xInd, yInd, COLORS_256[colorBucket][yInd][xInd]));
 
                 sb.append(String.format("\033[38;5;%sm%s\033[0m%n",
-                        colors256[colorBucket][yInd][xInd],
+                        COLORS_256[colorBucket][yInd][xInd],
                         current));
                 gradient++;
                 if (gradient % gradientLvl == 0 && gradient != 0) {
@@ -192,7 +226,7 @@ public class Jfiglol {
         public RainbowPrinter(Request request) {
             this();
             compression = request.args.size() > 0 ? Float.parseFloat(request.args.get(0)) :
-                     randomRequested ? random.nextFloat() : compression;
+                    randomRequested ? random.nextFloat() : compression;
             spread = request.args.size() >= 2 ? Float.parseFloat(request.args.get(1)) :
                     randomRequested ? random.nextFloat() : spread;
             freq = request.args.size() >= 3 ? Float.parseFloat(request.args.get(2)) :
@@ -277,40 +311,8 @@ public class Jfiglol {
     }
 
     /**
-     * User input requests container
+     * Read and collect all data from file
      */
-    private static class Request {
-        String[] names;
-        boolean requested;
-        List<String> args;
-        String description;
-        Class<?> clazz;
-
-        Request(String description, Class<?> clazz, String... names) {
-            this(description, names);
-            this.clazz = clazz;
-        }
-
-        Request(String description, String... names) {
-            this.names = names;
-            this.description = description;
-            args = new ArrayList<>();
-        }
-
-        void add(String arg) {
-            args.add(arg);
-        }
-
-        void setRequested() {
-            requested = true;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(" --Request %s: args: %s", Arrays.toString(names), args);
-        }
-    }
-
     private static class FileAppender implements Appender {
         private final String file;
 
@@ -334,6 +336,9 @@ public class Jfiglol {
         }
     }
 
+    /**
+     * Collect user input from app argument
+     */
     public static class DefaultAppender implements Appender {
         private final String input;
 
@@ -358,7 +363,7 @@ public class Jfiglol {
     }
 
     /**
-     * Contains utils for *.flf files
+     * Read, parse and collect all data from *.flf file
      */
     public static class FlfAppender implements Appender {
         private static final HashMap<Integer, Integer> OFFSET_MAP = new LinkedHashMap<>();
@@ -501,18 +506,22 @@ public class Jfiglol {
         }
     }
 
-    private static abstract class ArgumentHandler<T> {
-        protected ArgumentHandler<?> next;
+    /**
+     * Base app arguments handler.
+     * It scans all the arguments and argument options in a specific block and then pass control to another parser
+     * [ mods - mods parser] -> [ printer - printer parser] -> [options - extension parser]
+     */
+    private static abstract class ArgumentHandler {
+        protected ArgumentHandler next;
         protected Request request;
         protected Map<String, Request> localRequests;
-
-        protected abstract Map<String, Request> getLocalRequests();
-
         protected boolean requestFound;
 
         public ArgumentHandler() {
-            localRequests = getLocalRequests();
+            init();
         }
+
+        protected abstract void init();
 
         void handle(String[] args) {
             int off = 0;
@@ -551,19 +560,33 @@ public class Jfiglol {
             for (String name : localRequests.get(request.names[0]).names) {
                 if (arg.equals(name)) {
                     this.request = request;
-                    request.setRequested();
                     return true;
                 }
             }
             return false;
         }
 
-        void setNext(ArgumentHandler<?> next) {
+        void setNext(ArgumentHandler next) {
             this.next = next;
+        }
+
+        public Map<String, Request> getLocalRequests() {
+            return localRequests;
         }
     }
 
-    private static class ModeHandler extends ArgumentHandler<Appender> {
+    /**
+     * Detect requested mode (file, font or plain text)
+     */
+    private static class ModeHandler extends ArgumentHandler {
+        private static final Map<String, Request> LOCAL = new LinkedHashMap<>(Map.of(
+                "-p", new Request("{\"User input\"}",
+                        DefaultAppender.class, "-p", "--plain"),
+                "-f", new Request("{\"/path/to/font.flf\", \"User input\"}",
+                        FlfAppender.class, "-f", "--font"),
+                "-F", new Request("{\"/path/to/file\"}",
+                        FileAppender.class, "-F", "--file"))
+        );
 
         @Override
         protected void handleUnrecognizedOption(String arg) {
@@ -572,12 +595,8 @@ public class Jfiglol {
             System.exit(0);
         }
 
-        protected Map<String, Request> getLocalRequests() {
-            return new LinkedHashMap<>(Map.of(
-                    "-p", new Request("plain text", DefaultAppender.class, "-p","--plain"),
-                    "-f", new Request("font", FlfAppender.class, "-f", "--font"),
-                    "-F", new Request("file", FileAppender.class, "-F", "--file")
-            ));
+        protected void init() {
+            localRequests = LOCAL;
         }
 
         public Appender getAppender() throws NoSuchMethodException, IllegalAccessException,
@@ -587,7 +606,24 @@ public class Jfiglol {
         }
     }
 
-    private static class PrinterHandler extends ArgumentHandler<Printer> {
+    /**
+     * Detect requested printer (rainbow, gradient, mono or plain)
+     */
+    private static class PrinterHandler extends ArgumentHandler {
+        private static final Map<String, Request> LOCAL = new LinkedHashMap<>(Map.of(
+                "-m", new Request("{xTerm color (16...256)}", MonoPrinter.class,
+                        "-m", "--mono"),
+                "-g", new Request(String.format("{gradient level (default %d)}",
+                        GradientPrinter.DEFAULT_GRADIENT),
+                        GradientPrinter.class, "-g", "--gradient"),
+                "-r", new Request(String.format("{compression (default %.2f)},\n" +
+                                "                      {spread (default %.2f)},\n" +
+                                "                      {frequency (default %.2f)}\n",
+                        RainbowPrinter.DEFAULT_COMPRESSION,
+                        RainbowPrinter.DEFAULT_SPREAD,
+                        RainbowPrinter.DEFAULT_FREQUENCY),
+                        RainbowPrinter.class, "-r", "--rainbow"))
+        );
 
         @Override
         protected void handleUnrecognizedOption(String arg) {
@@ -596,15 +632,8 @@ public class Jfiglol {
             System.exit(0);
         }
 
-        protected Map<String, Request> getLocalRequests() {
-            return new LinkedHashMap<>(Map.of(
-                    "-m", new Request("mono color", MonoPrinter.class,
-                            "-m", "--mono"),
-                    "-g", new Request("plain text", GradientPrinter.class,
-                            "-g", "--gradient"),
-                    "-r", new Request("rainbow", RainbowPrinter.class,
-                            "-r", "--rainbow")
-            ));
+        protected void init() {
+            localRequests = LOCAL;
         }
 
         public Printer getPrinter() throws NoSuchMethodException, IllegalAccessException,
@@ -614,13 +643,21 @@ public class Jfiglol {
         }
     }
 
-    private static class ExtendsHandler extends ArgumentHandler<String> {
+    /**
+     * Detect requested app options (output animation, debug, current information or randomize all values)
+     */
+    private static class ExtendsHandler extends ArgumentHandler {
+        private static final Map<String, Request> LOCAL = new LinkedHashMap<>(Map.of(
+                "-a", new Request("(animated)", "-a", "--animated"),
+                "-r", new Request("(random params)", "-r", "--random"),
+                "-d", new Request("(app debug)", "-d", "--debug"),
+                "-v", new Request("(current info)", "-v", "--verbose")
+        ));
 
         @Override
         void handle(String[] args) {
-            Map<String, Request> local = getLocalRequests();
             for (String arg : args) {
-                for (Map.Entry<String, Request> entry : local.entrySet()) {
+                for (Map.Entry<String, Request> entry : localRequests.entrySet()) {
                     Request request = entry.getValue();
                     String[] names = request.names;
                     for (String name : names) {
@@ -632,13 +669,8 @@ public class Jfiglol {
             }
         }
 
-        protected Map<String, Request> getLocalRequests() {
-            return new LinkedHashMap<>(Map.of(
-                    "-a", new Request("animated", "-a", "--animated"),
-                    "-r", new Request("random params", "-r", "--random"),
-                    "-d", new Request("app debug", "-d", "--debug"),
-                    "-v", new Request("verbose", "-v", "--verbose")
-            ));
+        protected void init() {
+            localRequests = LOCAL;
         }
     }
 
@@ -660,8 +692,8 @@ public class Jfiglol {
 
         modeHandler.handle(args);
 
-        appender = modeHandler.getAppender();
-        printer = printerHandler.getPrinter();
+        Appender appender = modeHandler.getAppender();
+        Printer printer = printerHandler.getPrinter();
 
         if (GLOBAL_OPTIONS.containsKey("-v")) {
             System.out.print(appender);
@@ -673,11 +705,11 @@ public class Jfiglol {
 
     private static void fillColors() {
         int ind = 16;
-        for (int i = 0; i < colors256.length; i++) {
-            colors256[i] = new String[6][6];
-            for (int y = 0; y < colors256[i].length; y++) {
-                for (int x = 0; x < colors256[i].length; x++) {
-                    colors256[i][y][x] = String.format("%03d", ind++);
+        for (int i = 0; i < COLORS_256.length; i++) {
+            COLORS_256[i] = new String[6][6];
+            for (int y = 0; y < COLORS_256[i].length; y++) {
+                for (int x = 0; x < COLORS_256[i].length; x++) {
+                    COLORS_256[i][y][x] = String.format("%03d", ind++);
                 }
             }
         }
@@ -685,7 +717,7 @@ public class Jfiglol {
 
     public static void palette() {
         StringBuilder sb = new StringBuilder();
-        for (String[][] strings : colors256) {
+        for (String[][] strings : COLORS_256) {
             for (String[] string : strings) {
                 for (String s : string) {
                     sb.append("\033[38;5;")
@@ -701,19 +733,13 @@ public class Jfiglol {
     }
 
     public static void help() {
+        String mode = collect(ModeHandler.LOCAL);
+        String printer = collect(PrinterHandler.LOCAL);
+        String options = collect(ExtendsHandler.LOCAL);
         String format = "Usage: java Jfiglol [mode] [printer] [options]\n" +
-                "mode :    [ -p, --plain {\"User input\"} |\n" +
-                "            -f, --font {path/to/font_file.flf, \"User input\"} |\n" +
-                "            -F, --file {path}] \n\n" +
-                "printer : [ -m, --mono {color (range 16...255)} |\n" +
-                "            -g, --gradient {level (default %d)} |\n" +
-                "            -r, --rainbow {compression (default %.2f),\n" +
-                "                           spread (default %.2f),\n" +
-                "                           frequency (default %.2f)} ]\n\n" +
-                "options:  [ -a, --animated |\n" +
-                "            -r, --random |\n" +
-                "            -d, --debug |\n" +
-                "            -v, --verbose]\n\n" +
+                "mode:\n" + mode +
+                "printer:\n" + printer +
+                "options:\n" + options +
                 "Examples: \n" +
                 "         java Jfiglol -f \"./fonts/3d.flf\" \"Hello World!\" --rainbow 0.3 --animated\n" +
                 "         java Jfiglol -p \"Hello World!\" --gradient 0.2\n" +
@@ -726,8 +752,19 @@ public class Jfiglol {
                 "\n" +
                 "With passing arguments via pipeline:\n" +
                 "         echo \"Hello World!\" | xargs -I {} java Jfiglol --plain \"{}\" --rainbow --animated";
-        String help = String.format(format, GradientPrinter.DEFAULT_GRADIENT, RainbowPrinter.DEFAULT_COMPRESSION,
-                RainbowPrinter.DEFAULT_SPREAD, RainbowPrinter.DEFAULT_FREQUENCY);
-        new RainbowPrinter().print(new ArrayList<>(Arrays.asList(help.split("\\n"))));
+        new RainbowPrinter().print(new ArrayList<>(Arrays.asList(format.split("\\n"))));
+    }
+    
+    private static String collect(Map<String, Request> map) {
+        StringBuilder sb = new StringBuilder();
+        map.forEach((k, v) -> {
+            sb.append("         ");
+            for (String arg : v.names) {
+                sb.append(arg).append(" ");
+            }
+            sb.append(v.help);
+            sb.append("\n");
+        });
+        return sb.toString();
     }
 }
