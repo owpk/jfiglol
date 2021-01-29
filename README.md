@@ -29,7 +29,7 @@ $ cd jfiglol/app
 Patten:
 $java Jfiglol \[mode\] \[printer\] \[options\]
 
-To print text with specific fonts (you can download it from here http://www.figlet.org/examples.html aslo there is few in fonts folder which is in root project folder) 
+You can download figlet fonts from here http://www.figlet.org/examples.html aslo there is few in fonts folder which is in root project folder) 
 ```
 with specific font
 $ java Jfiglol --font "./fonts/3d.flf" "You text Here" -r
@@ -38,7 +38,7 @@ print file
 $ java Jfiglol --file "path/to/file" -r
 
 just your input
-$ java Jfiglol --plain "path/to/file" -r
+$ java Jfiglol --plain "Your input here" -r
 ```
  - Examples:
 
