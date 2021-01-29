@@ -1,37 +1,66 @@
-### Translate selected text and send it to windows notification center
+### animated lolcat combined with figlet
 
-<img src="https://github.com/vzvz4/dotfiles/blob/master/transl.gif"/>
+<img src="https://github.com/vzvz4/jfiglol/master/img/g.gif"/>
 
-### Installation Guide
-1. Make sure you have PowerShell installed
-    - You can check it, go to C:/Windows/System32/WindowsPowerShell/v1.0 and search for powershell.exe
-
-2. Make sure you have windows sub system linux (wsl) installed
-	- You can check it, go to C:/Windows/System32/ and search for wsl.exe,
-    see [installation guide](https://docs.microsoft.com/en-en/windows/wsl/install-win10) if needed.
-
-3. To send translated text to notify you have to install [BurntToast](https://github.com/Windos/BurntToast), should work fine just follow instructions. If some issues occures try to do this: 
-	 - Dont forget "unblock" the zip file before extracting the contents.
-	 - Open powershell and run this command "Import-Module BurntToast"  
-
-4. Download and unzip https://github.com/vzvz4/select-and-translate/releases/tag/0.0.2 or 
+### Installation
+1. Install java runtime enviroment
 ```
-$ git clone https://github.com/vzvz4/select-and-translate 
+ubuntu
+$ sudo apt install default-jre
+
+arch
+$ sudo pacman -S openjdk-8-jre-headless
 ```
-- run wsl.exe, go to the folder you just downloaded and copy "gclip", "pclip", "translator" and "notif" to /usr/local/bin/ directory
-- Step by step:
-```bash
-$ cd /mnt/c/'YOUR_PATH_TO_DOWNLOADS'/select-and-translate/tools/
-$ cp * /usr/local/bin/
+run java -version you should see something like this:
 ```
-### Usage Guide
-Copy any text you want to translate and double click to run-en.vbs, notification with translated text should pop up.
+openjdk version "8.0.1" 2018-04-17
+OpenJDK Runtime Environment (build 10.0.1+10-Ubuntu-3ubuntu1)
+OpenJDK 64-Bit Server VM (build 10.0.1+10-Ubuntu-3ubuntu1, mixed mode)
+```
+2. Clone repo and cd to 'app' directory
+```
+$ git clone "https://github.com/vzvz4/jfiglol"
+$ cd jfiglol/app
+```
 
-### Additions
- - Copy "run-\*.vbs" file (for example run-en.vbs), instead of "en" in "lang = en" paste any language you want to translate the selected text.
+### Usage
+ - run commands from app directory
 
- - Also you can bind execution of the tranlsation script to specific keys, i found this solution https://www.youtube.com/watch?v=tPcw-gDDVwo but it works a bit slow
+Patten:
+$java Jfiglol \[mode\] \[printer\] \[options\]
 
-<img src="https://github.com/vzvz4/dotfiles/blob/master/transl-hotkey.gif"/>
+To print text with specific fonts (you can download it from here aslo there is few in fonts folder which is in root project folder) 
+```
+with specific font
+$ java Jfiglol --font "./fonts/3d.flf" "You text Here" -r
 
- - Note that translated text copy to system clipboard so you can paste translation to where ever you want
+print file
+$ java Jfiglol --file "path/to/file" -r
+
+just your input
+$ java Jfiglol --plain "path/to/file" -r
+```
+ - Examples:
+
+ animated output with 3d.flf font and rainbow colors print mode
+ ```
+$ java Jfiglol --font "./fonts/3d.flf" "You text Here" --rainbow --animated
+```
+<img src="https://github.com/vzvz4/jfiglol/master/img/rainbow.gif"/>
+
+animated output with 3d.flf font and gradient colors print mode
+ ```
+$ java Jfiglol --font "./fonts/3d.flf" "You text Here" --gradient --animated  
+```
+<img src="https://github.com/vzvz4/jfiglol/master/img/gradient.gif"/>
+
+animated output with 3d.flf font and mono colors print mode
+ ```
+$ java Jfiglol --font "./fonts/3d.flf" "You text Here" --mono --animated 
+```
+<img src="https://github.com/vzvz4/jfiglol/master/img/mono.gif"/>
+
+ - Also you can use --verbose (-v), --random (-r) and --debug (-d) options
+```
+$ java Jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
+```
