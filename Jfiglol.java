@@ -100,6 +100,7 @@ public class Jfiglol {
     }
 
     public static class GradientPrinter extends AbsPrinter {
+        public static int DEFAULT_GRADIENT = 2;
         protected int colorBucket;
         protected int yInd;
         protected int xInd;
@@ -112,7 +113,7 @@ public class Jfiglol {
             xDirection = true;
             yDirection = true;
             gradientLvl = request.args.size() > 0 ? Integer.parseInt(request.args.get(0)) :
-                    randomRequested ? RANDOM.nextInt(5) + 1 : 2;
+                    randomRequested ? RANDOM.nextInt(5) + 1 : DEFAULT_GRADIENT;
             colorBucket = randomRequested ? RANDOM.nextInt(colors256.length) : 0;
             animationSpeed = 100;
         }
@@ -121,8 +122,8 @@ public class Jfiglol {
         protected void build(List<String> lines, StringBuilder sb) {
             int ind = -1;
             String current;
+            int gradient = 0;
             while (++ind < lines.size()) {
-                int gradient = 0;
                 current = lines.get(ind);
                 if (xInd >= colors256.length || xInd <= 0) {
                     yInd = getByDirection(yDirection, yInd);
@@ -144,12 +145,10 @@ public class Jfiglol {
                 sb.append(String.format("\033[38;5;%sm%s\033[0m%n",
                         colors256[colorBucket][yInd][xInd],
                         current));
-                xInd = getByDirection(xDirection, xInd);
                 gradient++;
                 if (gradient % gradientLvl == 0 && gradient != 0) {
                     xInd = getByDirection(xDirection, xInd);
                 }
-
             }
         }
 
@@ -172,6 +171,10 @@ public class Jfiglol {
     }
 
     public static class RainbowPrinter extends AbsPrinter {
+        public static float DEFAULT_COMPRESSION = 0.08f;
+        public static float DEFAULT_SPREAD = 0.01f;
+        public static float DEFAULT_FREQUENCY = 0.05f;
+
         protected Random random;
         protected float compression;
         protected float spread;
@@ -181,16 +184,19 @@ public class Jfiglol {
         public RainbowPrinter() {
             animationSpeed = 50;
             random = new Random();
+            compression = DEFAULT_COMPRESSION;
+            spread = DEFAULT_SPREAD;
+            freq = DEFAULT_FREQUENCY;
         }
 
         public RainbowPrinter(Request request) {
             this();
             compression = request.args.size() > 0 ? Float.parseFloat(request.args.get(0)) :
-                     randomRequested ? random.nextFloat() : 0.08f;
+                     randomRequested ? random.nextFloat() : compression;
             spread = request.args.size() >= 2 ? Float.parseFloat(request.args.get(1)) :
-                    randomRequested ? random.nextFloat() : 0.01f;
+                    randomRequested ? random.nextFloat() : spread;
             freq = request.args.size() >= 3 ? Float.parseFloat(request.args.get(2)) :
-                    randomRequested ? random.nextFloat() : 0.05f;
+                    randomRequested ? random.nextFloat() : freq;
         }
 
         protected void animate() {
@@ -568,9 +574,9 @@ public class Jfiglol {
 
         protected Map<String, Request> getLocalRequests() {
             return new LinkedHashMap<>(Map.of(
-                    "--plain", new Request("plain text", DefaultAppender.class, "--plain"),
-                    "--font", new Request("font", FlfAppender.class, "--font"),
-                    "--file", new Request("file", FileAppender.class, "--file")
+                    "-p", new Request("plain text", DefaultAppender.class, "-p","--plain"),
+                    "-f", new Request("font", FlfAppender.class, "-f", "--font"),
+                    "-F", new Request("file", FileAppender.class, "-F", "--file")
             ));
         }
 
@@ -695,31 +701,33 @@ public class Jfiglol {
     }
 
     public static void help() {
-        String help = "Usage: java Jfiglol [mode] [printer] [options]\n" +
-                "mode :    [--plain {\"User input\"} |\n" +
-                "           --font {path/to/font_file.flf, \"User input\"} |\n" +
-                "           --file {path}] \n\n" +
-                "printer : [--mono {color (range 16...255)} |\n" +
-                "           --gradient {level (float number, default 0.3)} |\n" +
-                "           --rainbow {0, 0} ]\n\n" +
-                "options:  [--animated {speed} |\n" +
-                "           --random |\n" +
-                "           --debug |\n" +
-                "           --verbose]\n\n" +
+        String format = "Usage: java Jfiglol [mode] [printer] [options]\n" +
+                "mode :    [ -p, --plain {\"User input\"} |\n" +
+                "            -f, --font {path/to/font_file.flf, \"User input\"} |\n" +
+                "            -F, --file {path}] \n\n" +
+                "printer : [ -m, --mono {color (range 16...255)} |\n" +
+                "            -g, --gradient {level (default %d)} |\n" +
+                "            -r, --rainbow {compression (default %.2f),\n" +
+                "                           spread (default %.2f),\n" +
+                "                           frequency (default %.2f)} ]\n\n" +
+                "options:  [ -a, --animated |\n" +
+                "            -r, --random |\n" +
+                "            -d, --debug |\n" +
+                "            -v, --verbose]\n\n" +
                 "Examples: \n" +
-                "         java Jfiglol --font \"./fonts/3d.flf\" \"Hello World!\" --rainbow 0.3 --animated\n" +
-                "         java Jfiglol --plain \"Hello World!\" --gradient 0.2\n" +
-                "         java Jfiglol --file \"./examples/example.txt\" --mono 144\n" +
+                "         java Jfiglol -f \"./fonts/3d.flf\" \"Hello World!\" --rainbow 0.3 --animated\n" +
+                "         java Jfiglol -p \"Hello World!\" --gradient 0.2\n" +
+                "         java Jfiglol -F \"./examples/example.txt\" --mono 144\n" +
                 "\n\n" +
-                "Additions: Jfiglol [--help | --palette-table]\n" +
+                "Additions: Jfiglol [ --help | --palette ]\n" +
                 "Examples:\n" +
                 "         java Jfiglol --help\n" +
                 "         java Jfiglol --palette\n" +
                 "\n" +
                 "With passing arguments via pipeline:\n" +
                 "         echo \"Hello World!\" | xargs -I {} java Jfiglol --plain \"{}\" --rainbow --animated";
+        String help = String.format(format, GradientPrinter.DEFAULT_GRADIENT, RainbowPrinter.DEFAULT_COMPRESSION,
+                RainbowPrinter.DEFAULT_SPREAD, RainbowPrinter.DEFAULT_FREQUENCY);
         new RainbowPrinter().print(new ArrayList<>(Arrays.asList(help.split("\\n"))));
     }
 }
-
-
