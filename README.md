@@ -1,6 +1,6 @@
 ### animated lolcat combined with figlet
 
-<img src="https://github.com/vzvz4/jfiglol/master/img/g.gif"/>
+<img src="https://github.com/vzvz4/jfiglol/tree/master/img/g.gif"/>
 
 ### Installation
 1. Install java runtime enviroment
@@ -46,19 +46,19 @@ $ java Jfiglol --plain "path/to/file" -r
  ```
 $ java Jfiglol --font "./fonts/3d.flf" "You text Here" --rainbow --animated
 ```
-<img src="https://github.com/vzvz4/jfiglol/master/img/rainbow.gif"/>
+<img src="https://github.com/vzvz4/jfiglol/tree/master/img/rainbow.gif"/>
 
 animated output with 3d.flf font and gradient colors print mode
  ```
 $ java Jfiglol --font "./fonts/3d.flf" "You text Here" --gradient --animated  
 ```
-<img src="https://github.com/vzvz4/jfiglol/master/img/gradient.gif"/>
+<img src="https://github.com/vzvz4/jfiglol/tree/master/img/gradient.gif"/>
 
 animated output with 3d.flf font and mono colors print mode
  ```
 $ java Jfiglol --font "./fonts/3d.flf" "You text Here" --mono --animated 
 ```
-<img src="https://github.com/vzvz4/jfiglol/master/img/mono.gif"/>
+<img src="https://github.com/vzvz4/jfiglol/tree/master/img/mono.gif"/>
 
  - Also you can use --verbose (-v), --random (-r) and --debug (-d) options
 ```
