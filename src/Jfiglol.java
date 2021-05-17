@@ -77,19 +77,19 @@ public class Jfiglol {
         String mode = collect(ModeHandler.LOCAL);
         String printer = collect(PrinterHandler.LOCAL);
         String options = collect(ExtendsHandler.LOCAL);
-        String format = "Usage: java Jfiglol [mode] [printer] [options]\n" +
+        String format = "Usage: jfiglol [mode] [printer] [options]\n" +
                 "mode:\n" + mode +
                 "printer:\n" + printer +
                 "options:\n" + options +
                 "Examples: \n" +
-                "         java Jfiglol -f \"./fonts/3d.flf\" \"Hello World!\" --rainbow 0.3 --animated\n" +
-                "         java Jfiglol -p \"Hello World!\" --gradient 0.2\n" +
-                "         java Jfiglol -F \"./examples/example.txt\" --mono 144\n" +
+                "         jfiglol -f \"./fonts/3d.flf\" \"Hello World!\" --rainbow 0.3 --animated\n" +
+                "         jfiglol -p \"Hello World!\" --gradient 0.2\n" +
+                "         jfiglol -F \"./examples/example.txt\" --mono 144\n" +
                 "\n\n" +
                 "Additions: Jfiglol [ --help | --palette ]\n" +
                 "Examples:\n" +
-                "         java Jfiglol --help\n" +
-                "         java Jfiglol --palette\n" +
+                "         jfiglol --help\n" +
+                "         jfiglol --palette\n" +
                 "\n" +
                 "With passing arguments via pipeline:\n" +
                 "         echo \"Hello World!\" | xargs -I {} java Jfiglol --plain \"{}\" --rainbow --animated";
