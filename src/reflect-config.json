@@ -1,0 +1,66 @@
+[ 
+   { 
+      "name": "ModeHandler",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+   { 
+      "name": "ExtendsHandler",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+   { 
+      "name": "ArgumentHandler",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+
+   { 
+      "name": "RainbowPrinter",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+   { 
+      "name": "GradientPrinter",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+   { 
+      "name": "MonoPrinter",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+   { 
+      "name": "FlfAppender",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+   { 
+      "name": "DefaultAppender",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   },
+
+   { 
+      "name": "FileAppender",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+    	"allDeclaredFields": true
+   }
+
+]
