@@ -13,10 +13,10 @@ with specific font
 $ ./jfiglol --font "/path/to/font.flf" "You text Here" -r
 
 print file
-$ ./jfiglol Jfiglol --file "path/to/file" -r
+$ ./jfiglol --file "path/to/file" -r
 
 just your input
-$ ./jfiglol Jfiglol --plain "Your input here" -r
+$ ./jfiglol --plain "Your input here" -r
 ```
  - Examples:
 
