@@ -2,34 +2,15 @@
 
 <img src="https://github.com/vzvz4/jfiglol/blob/master/img/g.gif"/>
 
-### Installation
-1. Install java runtime enviroment
-```
-ubuntu
-$ sudo apt install default-jre
-
-arch
-$ sudo pacman -S openjdk-8-jre-headless
-```
-run java -version you should see something like this:
-```
-openjdk version "8.0.1" 2018-04-17
-OpenJDK Runtime Environment (build 10.0.1+10-Ubuntu-3ubuntu1)
-OpenJDK 64-Bit Server VM (build 10.0.1+10-Ubuntu-3ubuntu1, mixed mode)
-```
-2. Clone repo and cd to 'app' directory
-```
-$ git clone "https://github.com/vzvz4/jfiglol"
-$ cd jfiglol/app
-```
-
 ### Usage
- - run commands from app directory
+- Go to "app" folder.
+- Option 1: use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory 
+- Option 2: use jar file. From directory root run java -jar Jfiglol.jar [commads]
 
-Patten:
+Command patten:
 $java Jfiglol \[mode\] \[printer\] \[options\]
 
-You can download figlet fonts from here http://www.figlet.org/examples.html aslo there is few in fonts folder which is in root project folder) 
+You can download figlet fonts here http://www.figlet.org/examples.html aslo there is few in fonts folder which is in root project folder) 
 ```
 with specific font
 $ java Jfiglol --font "/path/to/font.flf" "You text Here" -r
