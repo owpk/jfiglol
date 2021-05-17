@@ -12,7 +12,7 @@ jfiglol \[mode\] \[printer\] \[options\]
 You can download figlet fonts here http://www.figlet.org/examples.html aslo there is few in fonts folder which is in root project folder) 
 ```
 with specific font
-$ ./jfiglol --font "/path/to/font.flf" "You text Here" -r
+$ ./jfiglol --font "/path/to/font.flf" "Your text Here" -r
 
 print file
 $ ./jfiglol --file "path/to/file" -r
