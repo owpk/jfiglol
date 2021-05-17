@@ -1,6 +1,8 @@
 ### animated lolcat combined with figlet
 
-<img src="https://github.com/vzvz4/jfiglol/blob/master/img/g.gif"/>
+<p align="center">
+   <img src="https://github.com/vzvz4/jfiglol/blob/master/img/g.gif"/>
+</p>
 
 ### Usage
 - use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory   
