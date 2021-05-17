@@ -44,7 +44,7 @@ $ ./jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 ```
 <img src="https://github.com/vzvz4/jfiglol/blob/master/img/help.png"/>
 
-<h1> GraalVM Native-image </h1>
+<h1> GraalVM native-image </h1>
 
 - Produce a native image of the application:
 
@@ -54,7 +54,7 @@ $ ./jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 $ javac *.java
 ```
 
-2. produce natice image  
+2. produce native image  
 
 ```bash
 $ native-image --no-server --no-fallback --static \
