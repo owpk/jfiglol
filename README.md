@@ -5,7 +5,7 @@
 ### Usage
 - use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory   
 Command patten:
-$./jfiglol \[mode\] \[printer\] \[options\]
+jfiglol \[mode\] \[printer\] \[options\]
 
 You can download figlet fonts here http://www.figlet.org/examples.html aslo there is few in fonts folder which is in root project folder) 
 ```
