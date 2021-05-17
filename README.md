@@ -3,7 +3,7 @@
 <img src="https://github.com/vzvz4/jfiglol/blob/master/img/g.gif"/>
 
 ### Usage
-- use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory 
+- use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory   
 Command patten:
 $./jfiglol \[mode\] \[printer\] \[options\]
 
