@@ -58,13 +58,16 @@ $ ./jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 1. go to "src" directory, run commands below to compile all java classes  
 
 ```bash
-$ javac *.java
+$ javac com/owpk/*.java
+# or "javac -d "specific/out/folder" com/owpk/*.java"
+# if you want to compile file to specific folder
 ```
 
-2. produce native image  
+2. produce native image, you should use "reflect-config.json" file which is in project root
 
 ```bash
 $ native-image --no-server --no-fallback --static \
 -H:ReflectionConfigurationFiles="reflect-config.json" com.owpk.Jfiglol
 ```
-3. you should see "jfiglol" file in current directory
+3. you should see "com.owpk.jfiglol" binary file in current directory, rename it how you want and copy to
+   /usr/local/bin directory if you like.
