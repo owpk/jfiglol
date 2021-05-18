@@ -1,7 +1,11 @@
+package com.owpk.printer;
+
+import com.owpk.Jfiglol;
+
 import java.util.List;
 
 /**
- * Abstract printer, base output printer class contains method
+ * Abstract com.owpk.printer, base output com.owpk.printer class contains method
  * to print and/or animate output
  */
 public abstract class AbsPrinter implements Printer {
@@ -59,7 +63,7 @@ public abstract class AbsPrinter implements Printer {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(Jfiglol.VERBOSE_FORMAT, "printer name", getName()));
+        sb.append(String.format(Jfiglol.VERBOSE_FORMAT, "com.owpk.printer name", getName()));
         sb.append(String.format(Jfiglol.VERBOSE_FORMAT, "debug", debugRequested));
         sb.append(String.format(Jfiglol.VERBOSE_FORMAT, "random values", randomRequested));
         sb.append(String.format(Jfiglol.VERBOSE_FORMAT, "animation", animated));

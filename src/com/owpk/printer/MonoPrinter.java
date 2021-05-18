@@ -1,3 +1,8 @@
+package com.owpk.printer;
+
+import com.owpk.Jfiglol;
+import com.owpk.Request;
+
 import java.util.List;
 
 public class MonoPrinter extends AbsPrinter {
@@ -27,7 +32,7 @@ public class MonoPrinter extends AbsPrinter {
 
     @Override
     protected String getName() {
-        return "Mono printer";
+        return "Mono com.owpk.printer";
     }
 
     @Override

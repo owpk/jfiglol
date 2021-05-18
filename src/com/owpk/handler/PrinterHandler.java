@@ -1,9 +1,18 @@
+package com.owpk.handler;
+
+import com.owpk.Jfiglol;
+import com.owpk.Request;
+import com.owpk.printer.GradientPrinter;
+import com.owpk.printer.MonoPrinter;
+import com.owpk.printer.Printer;
+import com.owpk.printer.RainbowPrinter;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
 /**
- * Detect requested printer (rainbow, gradient, mono or plain)
+ * Detect requested com.owpk.printer (rainbow, gradient, mono or plain)
  */
 public class PrinterHandler extends ArgumentHandler {
     public static final Map<String, Request> LOCAL = new LinkedHashMap<>(Map.of(
@@ -23,9 +32,14 @@ public class PrinterHandler extends ArgumentHandler {
 
     @Override
     protected void handleUnrecognizedOption(String arg) {
-        System.out.println("Unrecognized printer option: " + arg);
-        super.handleUnrecognizedOption(arg);
-        System.exit(0);
+       this.request = LOCAL.get("-r");
+       if (next != null) {
+           next.handle(Jfiglol.getArgs());
+       }
+    }
+
+    @Override
+    protected void addNeededArgs() {
     }
 
     @Override
@@ -35,6 +49,7 @@ public class PrinterHandler extends ArgumentHandler {
 
     public Printer getPrinter() throws NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
+        if (this.request == null) this.request = LOCAL.get("-r");
         return (Printer) this.request.getClazz().getConstructor(Request.class)
                 .newInstance(this.request);
     }

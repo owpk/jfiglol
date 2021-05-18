@@ -1,3 +1,5 @@
+package com.owpk;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,13 +24,13 @@ public class Request {
         args = new ArrayList<>();
     }
 
-    public void add(String arg) {
+    public void addArg(String arg) {
         args.add(arg);
     }
 
     @Override
     public String toString() {
-        return String.format(" --Request %s: args: %s", Arrays.toString(names), args);
+        return String.format(" --com.owpk.Request %s: args: %s", Arrays.toString(names), args);
     }
 
     public String[] getNames() {

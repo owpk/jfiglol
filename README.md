@@ -4,9 +4,14 @@
    <img src="https://github.com/vzvz4/jfiglol/blob/master/img/g.gif"/>
 </p>
 
-### Usage
+## Usage
 - use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory   
-Command patten:
+```bash
+$ ./jfiglol "Your input here"
+# don't forget double quotes if your text contains spaces
+```
+### Command patten:
+
 jfiglol \[mode\] \[printer\] \[options\]
 
 You can download figlet fonts here http://www.figlet.org/examples.html aslo there is few in "fonts" folder.
@@ -60,6 +65,6 @@ $ javac *.java
 
 ```bash
 $ native-image --no-server --no-fallback --static \
--H:ReflectionConfigurationFiles="reflect-config.json" Jfiglol
+-H:ReflectionConfigurationFiles="reflect-config.json" com.owpk.Jfiglol
 ```
 3. you should see "jfiglol" file in current directory

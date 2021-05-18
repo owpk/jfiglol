@@ -1,5 +1,7 @@
+package com.owpk;
+
 /**
- * Convert RGB colors to palette terminal colors
+ * Convert com.owpk.RGB colors to palette terminal colors
  */
 public class RGB {
     private static final int[] offset = {0, 95, 135, 175, 215, 255};

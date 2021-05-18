@@ -1,3 +1,8 @@
+package com.owpk.appender;
+
+import com.owpk.Jfiglol;
+import com.owpk.Request;
+
 import java.util.List;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +25,7 @@ public class DefaultAppender implements Appender {
 
     @Override
     public String getName() {
-        return "Default appender";
+        return "Default com.owpk.appender";
     }
 
     @Override

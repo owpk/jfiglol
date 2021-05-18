@@ -1,3 +1,8 @@
+package com.owpk.printer;
+
+import com.owpk.Jfiglol;
+import com.owpk.Request;
+
 import java.util.List;
 
 public class GradientPrinter extends AbsPrinter {
@@ -61,7 +66,7 @@ public class GradientPrinter extends AbsPrinter {
 
     @Override
     protected String getName() {
-        return "Gradient printer";
+        return "Gradient com.owpk.printer";
     }
 
     @Override

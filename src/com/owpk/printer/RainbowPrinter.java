@@ -1,3 +1,9 @@
+package com.owpk.printer;
+
+import com.owpk.Jfiglol;
+import com.owpk.RGB;
+import com.owpk.Request;
+
 import java.util.Random;
 import java.util.List;
 
@@ -37,7 +43,7 @@ public class RainbowPrinter extends AbsPrinter {
 
     @Override
     protected String getName() {
-        return "Rainbow printer";
+        return "Rainbow com.owpk.printer";
     }
 
     protected void build(List<String> lines, StringBuilder sb) {

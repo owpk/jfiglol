@@ -1,3 +1,8 @@
+package com.owpk.appender;
+
+import com.owpk.Jfiglol;
+import com.owpk.Request;
+
 import java.util.List;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -20,7 +25,7 @@ public class FileAppender implements Appender {
 
     @Override
     public String getName() {
-        return "File appender";
+        return "File com.owpk.appender";
     }
 
     @Override

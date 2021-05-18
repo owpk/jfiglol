@@ -1,3 +1,5 @@
+package com.owpk.printer;
+
 import java.util.List;
 
 public interface Printer {

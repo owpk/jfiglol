@@ -1,6 +1,13 @@
+package com.owpk.handler;
+
+import com.owpk.Jfiglol;
+import com.owpk.Request;
+import com.owpk.appender.*;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Detect requested mode (file, font or plain text)
@@ -16,10 +23,25 @@ public class ModeHandler extends ArgumentHandler {
     );
 
     @Override
+    protected void addNeededArgs() {
+        Queue<String> args = Jfiglol.getArgs();
+        for (String arg : args) {
+            if (arg.startsWith("-")) break;
+            this.request.addArg(arg);
+        }
+    }
+
+    @Override
     protected void handleUnrecognizedOption(String arg) {
-        System.out.println("Unrecognized mode option: " + arg);
-        super.handleUnrecognizedOption(arg);
-        System.exit(0);
+        if (arg.startsWith("-")) {
+
+        } else {
+            this.request = LOCAL.get("-f");
+            this.request.addArg(arg);
+            Queue<String> args = Jfiglol.getArgs();
+            args.remove(arg);
+            handleArgsWithNextHandler(args);
+        }
     }
 
     protected Map<String, Request> init() {
