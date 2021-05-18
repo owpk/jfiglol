@@ -5,7 +5,8 @@
 </p>
 
 ## Usage
-- use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory   
+- use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory if you want  
+
 ```bash
 $ ./jfiglol "Your input here"
 # don't forget double quotes if your text contains spaces
@@ -57,7 +58,7 @@ $ ./jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 
 - Produce a native image of the application:
 
-1. go to "src" directory, run commands below to compile all java classes  
+1. from project root run commands below to compile all java classes  
 
 ```bash
 $ javac com/owpk/*.java
