@@ -5,7 +5,7 @@
 </p>
 
 ## Usage
-- use compiled native image binary named "jfiglol", copy "jfiglol" to /usr/bin/ directory if you want  
+- use file named "jfiglol", copy "jfiglol" to /usr/bin/ directory if you want  
 
 ```bash
 $ ./jfiglol "Your input here"
