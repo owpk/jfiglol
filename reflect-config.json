@@ -1,20 +1,20 @@
 [ 
    { 
-      "name": "ModeHandler",
+      "name": "com.owpk.handler.ModeHandler",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
    },
 
    { 
-      "name": "ExtendsHandler",
+      "name": "com.owpk.handler.ExtendsHandler",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
    },
 
    { 
-      "name": "ArgumentHandler",
+      "name": "com.owpk.handler.ArgumentHandler",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
@@ -22,42 +22,42 @@
 
 
    { 
-      "name": "RainbowPrinter",
+      "name": "com.owpk.printer.RainbowPrinter",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
    },
 
    { 
-      "name": "GradientPrinter",
+      "name": "com.owpk.printer.GradientPrinter",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
    },
 
    { 
-      "name": "MonoPrinter",
+      "name": "com.owpk.printer.MonoPrinter",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
    },
 
    { 
-      "name": "FlfAppender",
+      "name": "com.owpk.appender.FlfAppender",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
    },
 
    { 
-      "name": "DefaultAppender",
+      "name": "com.owpk.appender.DefaultAppender",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
    },
 
    { 
-      "name": "FileAppender",
+      "name": "com.owpk.appender.FileAppender",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
     	"allDeclaredFields": true
