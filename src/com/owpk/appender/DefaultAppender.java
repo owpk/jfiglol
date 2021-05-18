@@ -3,10 +3,10 @@ package com.owpk.appender;
 import com.owpk.Jfiglol;
 import com.owpk.Request;
 
-import java.util.List;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Collect user input from app argument

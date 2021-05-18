@@ -34,19 +34,19 @@ public class Request {
     }
 
     public String[] getNames() {
-       return names;
+        return names;
     }
 
     public List<String> getArgs() {
-       return args;
+        return args;
     }
 
     public String getHelp() {
-       return help;
+        return help;
     }
 
     public Class<?> getClazz() {
-       return clazz;
+        return clazz;
     }
 }
 

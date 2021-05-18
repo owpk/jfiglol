@@ -3,10 +3,10 @@ package com.owpk.appender;
 import com.owpk.Jfiglol;
 import com.owpk.Request;
 
-import java.util.List;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Read and collect all data from file

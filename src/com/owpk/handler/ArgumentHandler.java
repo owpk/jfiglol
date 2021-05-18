@@ -3,7 +3,6 @@ package com.owpk.handler;
 import com.owpk.Jfiglol;
 import com.owpk.Request;
 
-import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
@@ -22,9 +21,9 @@ public abstract class ArgumentHandler {
         localRequests = init();
     }
 
-	/**
-	* Must initialize 'localRequests' map with some args
-	*/
+    /**
+     * Must initialize 'localRequests' map with some args
+     */
     protected abstract Map<String, Request> init();
 
     protected void addNeededArgs() {
@@ -53,7 +52,7 @@ public abstract class ArgumentHandler {
     }
 
     protected boolean isArgContains(String arg, Map<String, Request> availableArgs) {
-        for (Map.Entry<String, Request> entry: availableArgs.entrySet()) {
+        for (Map.Entry<String, Request> entry : availableArgs.entrySet()) {
             for (String name : entry.getValue().getNames()) {
                 if (name.equals(arg)) {
                     this.request = entry.getValue();

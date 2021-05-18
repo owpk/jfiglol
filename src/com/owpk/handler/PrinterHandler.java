@@ -8,8 +8,8 @@ import com.owpk.printer.Printer;
 import com.owpk.printer.RainbowPrinter;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Detect requested com.owpk.printer (rainbow, gradient, mono or plain)
@@ -32,10 +32,10 @@ public class PrinterHandler extends ArgumentHandler {
 
     @Override
     protected void handleUnrecognizedOption(String arg) {
-       this.request = LOCAL.get("-r");
-       if (next != null) {
-           next.handle(Jfiglol.getArgs());
-       }
+        this.request = LOCAL.get("-r");
+        if (next != null) {
+            next.handle(Jfiglol.getArgs());
+        }
     }
 
     @Override

@@ -4,8 +4,8 @@ import com.owpk.Jfiglol;
 import com.owpk.RGB;
 import com.owpk.Request;
 
-import java.util.Random;
 import java.util.List;
+import java.util.Random;
 
 public class RainbowPrinter extends AbsPrinter {
     public static float DEFAULT_COMPRESSION = 0.08f;

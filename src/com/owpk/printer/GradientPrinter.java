@@ -46,8 +46,8 @@ public class GradientPrinter extends AbsPrinter {
             }
 
             if (debugRequested)
-                sb.append(String.format("b %d : x %2s: y %2s c: %s ", 
-						colorBucket, xInd, yInd, Jfiglol.COLORS_256[colorBucket][yInd][xInd]));
+                sb.append(String.format("b %d : x %2s: y %2s c: %s ",
+                        colorBucket, xInd, yInd, Jfiglol.COLORS_256[colorBucket][yInd][xInd]));
 
             sb.append(String.format("\033[38;5;%sm%s\033[0m%n",
                     Jfiglol.COLORS_256[colorBucket][yInd][xInd],
