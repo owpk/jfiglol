@@ -10,10 +10,11 @@
 ```bash
 $ ./jfiglol "Your input here"
 # don't forget double quotes if your text contains spaces
+
 $ ./jfiglol "Some text" -a 
 # if you want to animate your input
 ```
-### Command patten:
+### Command pattern:
 
 jfiglol \[mode\] \[printer\] \[options\]
 
