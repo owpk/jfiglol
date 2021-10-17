@@ -5,13 +5,13 @@
 </p>
 
 ## Usage
-- use file named "jfiglol", copy "jfiglol" to /usr/bin/ directory if you want  
+- use file named "jfiglol", copy "jfiglol" to /usr/bin/ directory if you want
 
 ```bash
 $ ./jfiglol "Your input here"
 # don't forget double quotes if your text contains spaces
 
-$ ./jfiglol "Some text" -a 
+$ ./jfiglol "Some text" -a
 # if you want to animate your input
 ```
 ### Command pattern:
@@ -39,13 +39,13 @@ $ ./jfiglol --font "/path/to/font.flf" "You text Here" --rainbow --animated
 
 animated output with 3d.flf font and gradient colors print mode
  ```
-$ ./jfiglol --font "/path/to/font.flf" "You text Here" --gradient --animated  
+$ ./jfiglol --font "/path/to/font.flf" "You text Here" --gradient --animated
 ```
 <img src="https://github.com/vzvz4/jfiglol/blob/master/img/gradient.gif"/>
 
 animated output with 3d.flf font and mono colors print mode
  ```
-$ ./jfiglol --font "/path/to/font.flf" "You text Here" --mono --animated 
+$ ./jfiglol --font "/path/to/font.flf" "You text Here" --mono --animated
 ```
 <img src="https://github.com/vzvz4/jfiglol/blob/master/img/mono.gif"/>
 
@@ -59,19 +59,30 @@ $ ./jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 
 - Produce a native image of the application:
 
-1. from project root run commands below to compile all java classes  
+- With gradle:
 
 ```bash
-$ javac com/owpk/*.java
-# or "javac -d "specific/out/folder" com/owpk/*.java"
-# if you want to compile file to specific folder
+$ ./gradlew nativeImage
+$ cd build/bin
 ```
-
-2. produce native image, you should use "reflect-config.json" file which is in project root
+- Manually:
+1. compile java classes and create configuration file directory
 
 ```bash
-$ native-image --no-server --no-fallback --static \
--H:ReflectionConfigurationFiles="reflect-config.json" com.owpk.Jfiglol
+$ mkdir bin
+$ javac -d ./bin ./src/**/*.java && cd bin
+$ jar cfm jfiglol.jar ../Manifest.txt ./com/*
+$ java -agentlib:native-image-agent=config-output-dir=conf/ -jar jfiglol.jar test
 ```
-3. you should see "com.owpk.jfiglol" binary file in current directory, rename it how you want and copy to
-   /usr/local/bin directory if you like.
+
+2. produce native image
+
+```bash
+$ native-image --allow-incomplete-classpath \
+  --report-unsupported-elements-at-runtime \
+  --no-fallback \
+  --no-server \
+  -H:ConfigurationFileDirectories=conf/ -jar jfiglol.jar
+```
+
+> you should see "jfiglol" binary file in current directory, you can copy it to your path like "/usr/local/bin"

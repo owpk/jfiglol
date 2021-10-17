@@ -1,0 +1,34 @@
+plugins {
+   id 'java'
+   id 'org.mikeneck.graalvm-native-image' version 'v1.4.0'
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "com.owpk.Jfiglol"
+    }
+}
+
+nativeImage {
+  graalVmHome = System.getProperty('java.home')
+  mainClass = 'com.owpk.Jfiglol' // Deprecated, use buildType.executable.main as follows instead.
+  executableName = 'jfiglol'
+  outputDirectory = file("$buildDir/bin")
+  arguments {
+    add '--no-fallback'
+    add '--report-unsupported-elements-at-runtime'
+    add '--no-server'
+  }
+}
+
+generateNativeImageConfig {
+  enabled = true
+  // mainClass = "com.owpk.Jfiglol"
+  byRunningApplication {
+    arguments('test')
+  }
+
+  byRunningApplication {
+    arguments('-F')
+  }
+}
