@@ -56,33 +56,37 @@ $ ./jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 <img src="https://github.com/vzvz4/jfiglol/blob/master/img/help.png"/>
 
 <h1> GraalVM native-image </h1>
+> prerequisites:
+> - java graalvm (install guide: https://www.graalvm.org/docs/getting-started/)
+> - native-image (install guide: https://www.graalvm.org/reference-manual/native-image/)
 
-- Produce a native image of the application:
+* Produce a native image
 
-- With gradle:
+   * With gradle:
 
-```bash
-$ ./gradlew nativeImage
-$ cd build/bin
-```
-- Manually:
-1. compile java classes and create configuration file directory
+   ```bash
+   $ ./gradlew nativeImage
+   $ cd build/bin
+   ```
 
-```bash
-$ mkdir bin
-$ javac -d ./bin ./src/**/*.java && cd bin
-$ jar cfm jfiglol.jar ../Manifest.txt ./com/*
-$ java -agentlib:native-image-agent=config-output-dir=conf/ -jar jfiglol.jar test
-```
+   * Manually:
+   1. compile java classes and create configuration file directory
 
-2. produce native image
+   ```bash
+   $ mkdir bin
+   $ javac -d ./bin ./src/**/*.java && cd bin
+   $ jar cfm jfiglol.jar ../Manifest.txt ./com/*
+   $ java -agentlib:native-image-agent=config-output-dir=conf/ -jar jfiglol.jar test
+   ```
 
-```bash
-$ native-image --allow-incomplete-classpath \
-  --report-unsupported-elements-at-runtime \
-  --no-fallback \
-  --no-server \
-  -H:ConfigurationFileDirectories=conf/ -jar jfiglol.jar
-```
+   2. produce native image
 
-> you should see "jfiglol" binary file in current directory, you can copy it to your path like "/usr/local/bin"
+   ```bash
+   $ native-image --allow-incomplete-classpath \
+     --report-unsupported-elements-at-runtime \
+     --no-fallback \
+     --no-server \
+     -H:ConfigurationFileDirectories=conf/ -jar jfiglol.jar
+   ```
+
+* You should see "jfiglol" binary file in current directory, you can copy it to your path like "/usr/local/bin"
