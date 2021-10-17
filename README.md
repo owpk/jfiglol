@@ -58,8 +58,8 @@ $ ./jfiglol --font "./fonts/3d.flf" "You text Here" --mono -d -v -r
 <h1> GraalVM native-image </h1>
 
 > prerequisites:
-> java graalvm (install guide: https://www.graalvm.org/docs/getting-started/)
-> native-image (install guide: https://www.graalvm.org/reference-manual/native-image/)
+- java graalvm (install guide: https://www.graalvm.org/docs/getting-started/)
+- native-image (install guide: https://www.graalvm.org/reference-manual/native-image/)
 
 * Produce a native image
 
