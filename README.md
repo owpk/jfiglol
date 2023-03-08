@@ -4,6 +4,17 @@
    <img src="https://github.com/vzvz4/jfiglol/blob/master/img/g.gif"/>
 </p>
 
+## Prerequisites
+ - jdk 17  
+ you can use [sdk man](https://sdkman.io/install) if you are on linux machine
+ - also check [GraalVM native-image](#gvm) section if you want to build native 'jfiglol' application
+
+## Build
+```bash
+$ ./gradlew shadowJar
+$ sudo cp build/libs/jfiglol-*-all.jar /bin/jfiglol.jar
+$ echo "alias jfiglol='java -jar /bin/jfiglol.jar' $@" >> ~/.bashrc #<- or change to '.your_shellrc' file name
+```
 ## Usage
 - use file named "jfiglol", copy "jfiglol" to /usr/bin/ directory if you want
 
@@ -15,11 +26,12 @@ $ ./jfiglol "Some text" -a
 # if you want to animate your input
 ```
 
-<h1> GraalVM native-image </h1>
+## <a name="gvm"></a><h1> GraalVM native-image </h1>
 
 > prerequisites:
-- java graalvm (install guide: https://www.graalvm.org/docs/getting-started/)
-- native-image (install guide: https://www.graalvm.org/reference-manual/native-image/)
+- java graalvm 17 (**yes only 17 java version required!**) [install guide](https://www.graalvm.org/docs/getting-started/)  
+  also you can use [sdk man](https://sdkman.io/install) if you are on linux machine
+- native-image [install guide](https://www.graalvm.org/reference-manual/native-image/)
 
 * Produce a native image
 
@@ -28,6 +40,7 @@ $ ./jfiglol "Some text" -a
    ```bash
    $ ./gradlew nativeBuild
    $ cd build/native/nativeCompile
+   $ ./jfiglol "Hello world!" -a
    ```
 ---
 
