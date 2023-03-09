@@ -1,7 +1,5 @@
 package com.owpk.appender;
 
-import com.owpk.Jfiglol;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,6 +24,16 @@ public class FlfAppender implements Appender {
         lines = Arrays.stream(DEFAULT.split("\n")).collect(Collectors.toList());
         this.input = input;
     }
+
+    public FlfAppender(String input, String file) {
+        this.input = input;
+        try {
+            lines = Files.readAllLines(Paths.get(file));
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
+
 
     /**
      * flf metadata pattern: [flf2a$ a b c d e
@@ -62,13 +70,6 @@ public class FlfAppender implements Appender {
 
     @Override
     public List<String> getResult() {
-        if (file != null) {
-            try {
-                lines = Files.readAllLines(Paths.get(file));
-            } catch (IOException e) {
-                throw new RuntimeException();
-            }
-        }
         readMetaData(lines.get(0));
         fillOffsets();
         String[] divided = input.split(" ");

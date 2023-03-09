@@ -28,8 +28,12 @@ public class Jfiglol implements Runnable {
     @Option(names = {"-F", "--file"}, description = "set user input as file name to print content from")
     boolean fileInput;
 
+    @Option(names = {"-t", "--font"}, description = "set flf font file")
+    String fontFile;
+
     @Parameters(index = "0", defaultValue = "", description = "user input")
     String input;
+
 
     public static void main(String[] args) throws Exception {
         PicocliRunner.run(Jfiglol.class, args);
@@ -49,7 +53,8 @@ public class Jfiglol implements Runnable {
                 throw new RuntimeException(e);
             }
         } else {
-            var flfAppender = new FlfAppender(input);
+            var flfAppender = fontFile == null ?
+                new FlfAppender(input) : new FlfAppender(input, fontFile);
             var composed = flfAppender.getResult().stream()
                     .collect(Collectors.joining(System.lineSeparator()));
             renderable = new RainbowDecorator(() -> composed);

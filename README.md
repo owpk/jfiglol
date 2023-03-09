@@ -24,7 +24,11 @@ $ ./jfiglol "Your input here"
 
 $ ./jfiglol "Some text" -a
 # if you want to animate your input
+
+$ ./jfiglol "Hello world!" -a -t /path/to/font.flf
+# if you want to specify font file
 ```
+ - [flf fonts](https://github.com/xero/figlet-fonts)
 
 ## <a name="gvm"></a><h1> GraalVM native-image </h1>
 
