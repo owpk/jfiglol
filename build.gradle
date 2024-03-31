@@ -1,20 +1,39 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.7.3"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "io.micronaut.application" version "4.3.2"
+    id "io.micronaut.aot" version "4.3.2"
+    id 'application'
+    id 'java'
 }
 
 version = "0.1"
 group = "com.owpk"
 
+compileJava { options.encoding = "UTF-8" }
+
 repositories {
     mavenCentral()
 }
 
+graalvmNative {
+    binaries {
+        main {
+            imageName.set('jfiglol')
+            buildArgs.add('--verbose')
+        }
+    }
+}
+
+graalvmNative.toolchainDetection = false
+
 dependencies {
-    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("info.picocli:picocli-codegen")
     implementation("info.picocli:picocli")
     implementation("io.micronaut.picocli:micronaut-picocli")
+    annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
+
+    runtimeOnly("ch.qos.logback:logback-classic")
+    annotationProcessor("org.projectlombok:lombok")
     compileOnly("org.projectlombok:lombok")
     compileOnly("org.graalvm.nativeimage:svm")
 }
@@ -32,5 +51,14 @@ micronaut {
     processing {
         incremental(true)
         annotations("com.owpk.*")
+    }
+    aot {
+        optimizeServiceLoading = false
+        convertYamlToJava = false
+        precomputeOperations = true
+        cacheEnvironment = true
+        optimizeClassLoading = true
+        deduceEnvironment = true
+        optimizeNetty = true
     }
 }
