@@ -1,9 +1,6 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "8.1.1"
-    id "io.micronaut.application" version "4.3.2"
-    id "io.micronaut.aot" version "4.3.2"
-    id 'application'
-    id 'java'
+   id("io.micronaut.application") version "4.5.3"
+   id("com.gradleup.shadow") version "8.3.6"
 }
 
 version = "0.1"
@@ -35,7 +32,6 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     annotationProcessor("org.projectlombok:lombok")
     compileOnly("org.projectlombok:lombok")
-    compileOnly("org.graalvm.nativeimage:svm")
 }
 
 application {
@@ -43,22 +39,13 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-    targetCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.toVersion("21")
+    targetCompatibility = JavaVersion.toVersion("21")
 }
 
 micronaut {
     processing {
         incremental(true)
         annotations("com.owpk.*")
-    }
-    aot {
-        optimizeServiceLoading = false
-        convertYamlToJava = false
-        precomputeOperations = true
-        cacheEnvironment = true
-        optimizeClassLoading = true
-        deduceEnvironment = true
-        optimizeNetty = true
     }
 }
