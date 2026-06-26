@@ -50,18 +50,3 @@ echo "alias jfiglol='java -jar /bin/jfiglol.jar' $@" >> ~/.bashrc # or replace w
 cd build/native/nativeCompile
 ./jfiglol "Hello, world!" -a
 ```
-
----
-
-## Micronaut 3.8.6 Documentation
-
-- [User Guide](https://docs.micronaut.io/3.8.6/guide/index.html)
-- [API Reference](https://docs.micronaut.io/3.8.6/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/3.8.6/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
-
-## Useful Links
-
-- [Shadow Gradle Plugin](https://plugins.gradle.org/plugin/com.github.johnrengelman.shadow)
-- [Micronaut Lombok Documentation](https://docs.micronaut.io/latest/guide/index.html#lombok)
-- [Lombok Features](https://projectlombok.org/features/all)
